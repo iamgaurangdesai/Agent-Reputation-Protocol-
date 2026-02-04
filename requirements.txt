@@ -1,0 +1,14 @@
+# Agent Reputation Protocol Dependencies
+# No external dependencies for the demo
+# For full implementation, add:
+
+# Web3/Smart Contracts
+# web3>=6.0.0
+# eth-typing>=3.0.0
+
+# Testing
+# pytest>=7.0.0
+# pytest-asyncio>=0.21.0
+
+# Utilities
+# python-dotenv>=1.0.0
