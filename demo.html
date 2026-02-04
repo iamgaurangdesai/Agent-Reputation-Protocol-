@@ -88,6 +88,8 @@
             margin-bottom: 80px;
             padding-bottom: 24px;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
         .logo {
@@ -113,25 +115,67 @@
             font-size: 18px;
         }
 
-        .status {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            padding: 6px 12px;
-            background: var(--primary-glow);
-            border: 1px solid var(--primary-dim);
-            border-radius: 4px;
-            color: var(--primary);
+        .network-toggle {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 10px;
         }
 
-        .status-dot {
-            width: 6px;
-            height: 6px;
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 22px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-switch.active {
             background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: var(--text);
             border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-switch.active::after {
+            left: calc(100% - 18px);
+        }
+
+        .network-label {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: opacity 0.2s ease;
+        }
+
+        .network-mainnet {
+            background: var(--primary-glow);
+            border: 1px solid var(--primary-dim);
+            color: var(--primary);
+        }
+
+        .network-sepolia {
+            background: rgba(255, 179, 71, 0.15);
+            border: 1px solid rgba(255, 179, 71, 0.3);
+            color: #ffb347;
         }
 
         @keyframes pulse {
@@ -572,9 +616,16 @@
                 <div class="logo-mark">⌘</div>
                 <span>ARP // v2.0</span>
             </div>
-            <div class="status">
-                <span class="status-dot"></span>
-                BASE MAINNET
+            <div class="network-toggle">
+                <div class="network-label network-sepolia" id="sepoliaLabel">
+                    <span class="status-dot" style="background:#ffb347"></span>
+                    SEPOLIA
+                </div>
+                <div class="toggle-switch" id="networkToggle" onclick="toggleNetwork()"></div>
+                <div class="network-label network-mainnet" id="mainnetLabel">
+                    <span class="status-dot"></span>
+                    MAINNET
+                </div>
             </div>
         </header>
 
@@ -690,7 +741,9 @@
 
         <footer>
             <span>© 2026 AGENT REPUTATION PROTOCOL</span>
-            <span class="contract">0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</span>
+            <span class="contract">
+                <span id="currentContract">0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</span>
+            </span>
         </footer>
     </div>
 
@@ -775,6 +828,59 @@
         });
 
         renderLeaderboard();
+
+        // Network Toggle
+        const contracts = {
+            sepolia: {
+                address: '0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39',
+                label: 'Base Sepolia',
+                color: '#ffb347'
+            },
+            mainnet: {
+                address: 'TBD',
+                label: 'Base Mainnet',
+                color: '#00ff9d'
+            }
+        };
+
+        let currentNetwork = 'sepolia';
+
+        function toggleNetwork() {
+            currentNetwork = currentNetwork === 'sepolia' ? 'mainnet' : 'sepolia';
+            updateNetworkUI();
+            updateContractDisplay();
+        }
+
+        function updateNetworkUI() {
+            const toggle = document.getElementById('networkToggle');
+            const sepoliaLabel = document.getElementById('sepoliaLabel');
+            const mainnetLabel = document.getElementById('mainnetLabel');
+
+            if (currentNetwork === 'sepolia') {
+                toggle.classList.remove('active');
+                sepoliaLabel.style.opacity = '1';
+                mainnetLabel.style.opacity = '0.5';
+            } else {
+                toggle.classList.add('active');
+                sepoliaLabel.style.opacity = '0.5';
+                mainnetLabel.style.opacity = '1';
+            }
+        }
+
+        function updateContractDisplay() {
+            const contractEl = document.getElementById('currentContract');
+            const contract = contracts[currentNetwork];
+            if (contractEl) {
+                contractEl.textContent = contract.address;
+                contractEl.style.color = contract.color;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNetworkUI();
+            updateContractDisplay();
+        });
     </script>
 </body>
 </html>
