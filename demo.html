@@ -3,273 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARP - Agent Reputation Protocol Demo</title>
+    <title>ARP x Ethos Integration - Agent Reputation Demo</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 10px; font-size: 2.5em; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 2.5em; margin-bottom: 10px; background: linear-gradient(90deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .subtitle { text-align: center; color: #8892b0; margin-bottom: 30px; }
-        .tagline { text-align: center; color: #64ffda; font-size: 1.2em; margin-bottom: 30px; }
+        .badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin: 5px; }
+        .badge-arp { background: linear-gradient(90deg, #4facfe, #00f2fe); color: #000; }
+        .badge-ethos { background: linear-gradient(90deg, #fa709a, #fee140); color: #000; }
+        .badge-unified { background: linear-gradient(90deg, #a8edea, #fed6e3); color: #000; }
         
-        .agents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .agent-card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s; }
-        .agent-card:hover { transform: translateY(-5px); border-color: #64ffda; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: rgba(255,255,255,0.05); border-radius: 15px; padding: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .card h3 { margin-bottom: 15px; color: #64ffda; }
+        
+        .agent-card { text-align: center; padding: 20px; }
+        .agent-avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2em; }
         .agent-name { font-size: 1.3em; font-weight: bold; margin-bottom: 10px; }
-        .agent-stats { color: #8892b0; font-size: 0.9em; }
-        .agent-stats div { margin: 5px 0; }
-        .tier { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
-        .tier-newcomer { background: #4a5568; }
-        .tier-trusted { background: #48bb78; }
-        .tier-elite { background: #9f7aea; }
-        .tier-legendary { background: #f6e05e; color: #1a1a2e; }
-        .score { font-size: 2em; font-weight: bold; color: #64ffda; }
+        .agent-tier { font-size: 1.5em; margin-bottom: 10px; }
+        .agent-score { font-size: 2em; font-weight: bold; background: linear-gradient(90deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .agent-details { text-align: left; margin-top: 15px; font-size: 0.85em; color: #8892b0; }
+        .agent-details div { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
         
-        .actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .action-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 15px 20px; border-radius: 8px; cursor: pointer; font-size: 1em; transition: transform 0.2s, box-shadow 0.2s; }
-        .action-btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); }
-        .action-btn:active { transform: scale(0.95); }
+        .score-breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+        .score-item { text-align: center; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .score-label { font-size: 0.8em; color: #8892b0; margin-bottom: 5px; }
+        .score-value { font-size: 1.5em; font-weight: bold; }
+        .score-arp { color: #4facfe; }
+        .score-ethos { color: #fa709a; }
+        .score-unified { color: #a8edea; }
         
-        .log { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; }
-        .log-entry { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.3s; }
-        .log-entry:last-child { border-bottom: none; }
-        .log-time { color: #64ffda; font-size: 0.8em; }
-        .log-msg { margin-top: 5px; }
-        .log-good { color: #48bb78; }
-        .log-bad { color: #fc8181; }
-        .log-info { color: #90cdf4; }
+        .scenario { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 15px; margin: 10px 0; border-left: 4px solid #64ffda; }
+        .scenario-bad { border-left-color: #f5576c; }
+        .scenario-scam { border-left-color: #ff0000; background: rgba(255,0,0,0.1); }
         
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 30px 0; }
-        .feature { text-align: center; padding: 15px; background: rgba(100, 255, 218, 0.1); border-radius: 8px; }
-        .feature-icon { font-size: 2em; margin-bottom: 10px; }
-        .feature-name { font-weight: bold; color: #64ffda; }
+        .rating { color: #ffd700; font-size: 1.2em; }
+        .status { padding: 5px 10px; border-radius: 5px; font-size: 0.8em; display: inline-block; margin-top: 5px; }
+        .status-good { background: #00c853; color: #000; }
+        .status-bad { background: #ff1744; color: #fff; }
+        .status-warning { background: #ff9100; color: #000; }
         
-        .leaderboard { margin-top: 30px; }
-        .leaderboard h2 { margin-bottom: 20px; text-align: center; }
-        .lb-entry { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.05); margin-bottom: 10px; border-radius: 8px; }
-        .lb-rank { font-size: 1.5em; font-weight: bold; width: 50px; }
-        .lb-name { flex: 1; }
-        .lb-score { font-size: 1.5em; font-weight: bold; color: #64ffda; }
+        .cta { text-align: center; margin: 40px 0; }
+        .cta-button { display: inline-block; padding: 15px 40px; background: linear-gradient(90deg, #4facfe, #00f2fe); color: #000; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 1.1em; transition: transform 0.3s; }
+        .cta-button:hover { transform: scale(1.05); }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        .pulse { animation: pulse 2s infinite; }
+        .feature { display: flex; align-items: center; margin: 10px 0; }
+        .feature-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 1.2em; }
+        .icon-unified { background: linear-gradient(90deg, #a8edea, #fed6e3); }
+        .icon-slash { background: linear-gradient(90deg, #ff6b6b, #ee5a24); }
+        .icon-cross { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+        .icon-score { background: linear-gradient(90deg, #f093fb, #f5576c); }
+        
+        .leaderboard { width: 100%; border-collapse: collapse; }
+        .leaderboard th, .leaderboard td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .leaderboard th { color: #64ffda; font-weight: bold; }
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+        .scammer { color: #ff0000; }
+        
+        .hackathon { background: linear-gradient(90deg, rgba(240,147,251,0.2), rgba(245,87,108,0.2)); border-radius: 15px; padding: 30px; text-align: center; margin: 30px 0; border: 2px solid rgba(240,147,251,0.3); }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏆 Agent Reputation Protocol</h1>
-        <p class="subtitle">First On-Chain Reputation System for AI Agents</p>
-        <p class="tagline">"Trust, but verify. On-chain."</p>
+        <h1>🏆 ARP x Ethos Integration</h1>
+        <p class="subtitle">First Unified Trust Layer for AI Agents • USDC Agentic Hackathon Submission</p>
         
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">💰</div>
-                <div class="feature-name">Delegated Staking</div>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <span class="badge badge-arp">🤖 ARP v2.0</span>
+            <span class="badge badge-ethos">🌐 Ethos Network</span>
+            <span class="badge badge-unified">🎯 Unified Score</span>
+        </div>
+        
+        <div class="hackathon">
+            <h2>🚀 USDC Agentic Hackathon 2026</h2>
+            <p style="color: #8892b0; margin-top: 10px;">Agent Reputation Protocol + Ethos Credibility = Ultimate Trust Infrastructure</p>
+        </div>
+        
+        <h2 style="margin: 30px 0 20px;">🎯 Why ARP x Ethos?</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>🤖 ARP = Agent Reputation</h3>
+                <div class="feature"><div class="feature-icon icon-unified">💰</div><div>Delegated Staking</div></div>
+                <div class="feature"><div class="feature-icon icon-slash">⚔️</div><div>Reputation Oracles</div></div>
+                <div class="feature"><div class="feature-icon icon-cross">🎯</div><div>Prediction Markets</div></div>
+                <div class="feature"><div class="feature-icon icon-score">🎨</div><div>Reputation NFTs</div></div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🔮</div>
-                <div class="feature-name">Reputation Oracles</div>
+            <div class="card">
+                <h3>🌐 Ethos = Human Credibility</h3>
+                <div class="feature"><div class="feature-icon icon-unified">📝</div><div>Reviews & Vouching</div></div>
+                <div class="feature"><div class="feature-icon icon-slash">⚔️</div><div>Slashing Bad Actors</div></div>
+                <div class="feature"><div class="feature-icon icon-cross">📊</div><div>Credibility Scores</div></div>
+                <div class="feature"><div class="feature-icon icon-score">🔗</div><div>Chrome Extension</div></div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🎯</div>
-                <div class="feature-name">Prediction Markets</div>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🎨</div>
-                <div class="feature-name">Reputation NFTs</div>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">⚖️</div>
-                <div class="feature-name">Slash Councils</div>
+            <div class="card">
+                <h3>🎯 Combined = Ultimate Trust</h3>
+                <div class="feature"><div class="feature-icon icon-unified">✅</div><div>Cross-Referenced Scores</div></div>
+                <div class="feature"><div class="feature-icon icon-slash">🚫</div><div>Shared Blacklist</div></div>
+                <div class="feature"><div class="feature-icon icon-cross">🔮</div><div>Dual Oracles</div></div>
+                <div class="feature"><div class="feature-icon icon-score">🌐</div><div>Universal Trust</div></div>
             </div>
         </div>
         
-        <div class="agents-grid" id="agentsGrid"></div>
-        
-        <div class="actions">
-            <button class="action-btn" onclick="runDemo()">🚀 Run Full Demo</button>
-            <button class="action-btn" onclick="resetDemo()">🔄 Reset Demo</button>
-            <button class="action-btn" onclick="registerAgent()">➕ Register Agent</button>
-            <button class="action-btn" onclick="makeTransaction()">💸 Make Transaction</button>
-            <button class="action-btn" onclick="slashBadActor()">⚖️ Slash Bad Actor</button>
+        <h2 style="margin: 30px 0 20px;">👥 Demo Agents</h2>
+        <div class="grid">
+            <div class="card agent-card" style="background: linear-gradient(135deg, rgba(240,147,251,0.2), rgba(245,87,108,0.2));">
+                <div class="agent-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">👑</div>
+                <div class="agent-name">Gaurang-Desai</div>
+                <div class="agent-tier">👑 LEGENDARY</div>
+                <div class="agent-score">114.7</div>
+                <div class="agent-details">
+                    <div>💰 Stake: 500 USDC</div>
+                    <div>📅 Wallet: 3.5 years</div>
+                    <div>👍 Vouches: 35</div>
+                    <div>⭐ Reviews: +88/-2</div>
+                    <div>⚠️ Sybil Risk: 2%</div>
+                </div>
+            </div>
+            <div class="card agent-card">
+                <div class="agent-avatar" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">🏅</div>
+                <div class="agent-name">Trustworthy-Alice</div>
+                <div class="agent-tier">🏅 ESTABLISHED</div>
+                <div class="agent-score">72.2</div>
+                <div class="agent-details">
+                    <div>💰 Stake: 200 USDC</div>
+                    <div>📅 Wallet: 4.0 years</div>
+                    <div>👍 Vouches: 40</div>
+                    <div>⭐ Reviews: +75/-1</div>
+                    <div>⚠️ Sybil Risk: 2%</div>
+                </div>
+            </div>
+            <div class="card agent-card">
+                <div class="agent-avatar" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">🚫</div>
+                <div class="agent-name">ScamBot-Eve</div>
+                <div class="agent-tier">⚠️ SCAMMER</div>
+                <div class="agent-score">5.6</div>
+                <div class="agent-details">
+                    <div>💰 Stake: 5 USDC</div>
+                    <div>📅 Wallet: 0.05 years</div>
+                    <div>👍 Vouches: 0</div>
+                    <div>⭐ Reviews: +1/-15</div>
+                    <div>⚠️ Sybil Risk: 90%</div>
+                </div>
+            </div>
         </div>
         
-        <div class="leaderboard">
-            <h2>🏆 Leaderboard</h2>
-            <div id="leaderboard"></div>
+        <h2 style="margin: 30px 0 20px;">📊 Unified Scoring Formula</h2>
+        <div class="card" style="text-align: center;">
+            <p style="font-size: 1.3em; font-family: 'Courier New', monospace; margin: 20px 0;">
+                <span style="color: #4facfe;">Final Score</span> = (<span style="color: #4facfe;">ARP Score</span> × 0.5) + (<span style="color: #fa709a;">Ethos Credibility</span> × 0.5)
+            </p>
+            <div class="score-breakdown">
+                <div class="score-item">
+                    <div class="score-label">ARP Score</div>
+                    <div class="score-value score-arp">190.0</div>
+                    <div style="font-size: 0.8em; color: #8892b0;">Agent Reputation</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Ethos Score</div>
+                    <div class="score-value score-ethos">144.4</div>
+                    <div style="font-size: 0.8em; color: #8892b0;">Human Credibility</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Unified Score</div>
+                    <div class="score-value score-unified">119.7</div>
+                    <div style="font-size: 0.8em; color: #8892b0;">Combined Trust</div>
+                </div>
+            </div>
         </div>
         
-        <div class="log">
-            <div id="log"></div>
+        <h2 style="margin: 30px 0 20px;">💸 Transaction Scenarios</h2>
+        <div class="card">
+            <div class="scenario">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>Gaurang ↔ Alice</strong> (250 USDC)
+                        <div class="rating">⭐⭐⭐⭐⭐ Perfect!</div>
+                    </div>
+                    <div class="status status-good">✅ TRUSTED</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #8892b0;">
+                    Alice has Ethos credibility: 144.7 | ARP score: 112.0 | Combined: 72.2 (🏅 ESTABLISHED)
+                </div>
+            </div>
+            <div class="scenario scenario-bad">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>Gaurang ↔ Dave</strong> (75 USDC)
+                        <div class="rating">⭐⭐ Bad Experience</div>
+                    </div>
+                    <div class="status status-warning">⚠️ CAUTION</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #8892b0;">
+                    Dave has low credibility: 7.5 | Only 0.3 years on chain | Newcomer tier
+                </div>
+            </div>
+            <div class="scenario scenario-scam">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>Gaurang ↔ Eve</strong> (200 USDC)
+                        <div class="rating">⭐ SCAM REPORTED!</div>
+                    </div>
+                    <div class="status status-bad">🚫 FLAGGED</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.9em; color: #8892b0;">
+                    Eve: 🚨 FLAGGED IN BOTH ARP + ETHOS! | Shared slashing executed | Blacklisted!
+                </div>
+            </div>
+        </div>
+        
+        <h2 style="margin: 30px 0 20px;">🏆 Leaderboard</h2>
+        <div class="card">
+            <table class="leaderboard">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Agent</th>
+                        <th>ARP Score</th>
+                        <th>Ethos Score</th>
+                        <th>Unified</th>
+                        <th>Tier</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="rank-1">🥇 1</td>
+                        <td>👑 Gaurang-Desai</td>
+                        <td>190.0</td>
+                        <td>144.4</td>
+                        <td style="font-weight: bold;">114.7</td>
+                        <td>👑 LEGENDARY</td>
+                    </tr>
+                    <tr>
+                        <td class="rank-2">🥈 2</td>
+                        <td>🏅 Trustworthy-Alice</td>
+                        <td>112.0</td>
+                        <td>144.7</td>
+                        <td style="font-weight: bold;">72.2</td>
+                        <td>🏅 ESTABLISHED</td>
+                    </tr>
+                    <tr>
+                        <td class="rank-3">🥉 3</td>
+                        <td>🏅 Solid-Bob</td>
+                        <td>106.0</td>
+                        <td>125.5</td>
+                        <td style="font-weight: bold;">71.0</td>
+                        <td>🏅 ESTABLISHED</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>✅ Average-Charlie</td>
+                        <td>64.5</td>
+                        <td>84.5</td>
+                        <td style="font-weight: bold;">49.5</td>
+                        <td>✅ TRUSTED</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>🆕 Shady-Dave</td>
+                        <td>15.0</td>
+                        <td>25.0</td>
+                        <td style="font-weight: bold;">7.5</td>
+                        <td>🆕 NEWCOMER</td>
+                    </tr>
+                    <tr>
+                        <td class="scammer">6</td>
+                        <td class="scammer">🚫 ScamBot-Eve</td>
+                        <td class="scammer">11.0</td>
+                        <td class="scammer">0.0</td>
+                        <td class="scammer" style="font-weight: bold;">5.6</td>
+                        <td class="scammer">⚠️ SCAMMER</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 style="margin: 30px 0 20px;">🔗 Integration Features</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>🔍 Cross-Referenced Scores</h3>
+                <p style="color: #8892b0; line-height: 1.6;">Query both ARP and Ethos APIs for comprehensive trust signals. Combined scores are more robust than single-source ratings.</p>
+            </div>
+            <div class="card">
+                <h3>⚔️ Shared Slashing</h3>
+                <p style="color: #8892b0; line-height: 1.6;">Bad actors flagged in ARP automatically sync to Ethos, and vice versa. Unified blacklist protects the entire ecosystem.</p>
+            </div>
+            <div class="card">
+                <h3>🎯 Dual Oracles</h3>
+                <p style="color: #8892b0; line-height: 1.6;">Elite agents (ARP Oracles) and trusted humans (Ethos Vouchers) both contribute to unified reputation scores.</p>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <a href="https://github.com/iamgaurangdesai/Agent-Reputation-Protocol-" class="cta-button">
+                📦 View on GitHub
+            </a>
+        </div>
+        
+        <div style="text-align: center; color: #8892b0; margin-top: 40px; padding: 20px;">
+            <p>🤖 Built for USDC Agentic Hackathon 2026</p>
+            <p style="margin-top: 10px;">ARP v2.0 + Ethos Integration</p>
+            <p style="margin-top: 5px; font-size: 0.9em;">First on-chain reputation system for AI agents</p>
         </div>
     </div>
-    
-    <script>
-        let agents = [];
-        let agentId = 0;
-        let logEntries = [];
-        
-        function init() {
-            agents = [
-                { id: 0, name: 'Genie-Commerce', stake: 50, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false },
-                { id: 1, name: 'TraderBot-X', stake: 25, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false },
-                { id: 2, name: 'PaymentAgent-7', stake: 100, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false },
-                { id: 3, name: 'ShadyBot-99', stake: 10, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: true }
-            ];
-            agentId = 4;
-            updateAll();
-            log('🚀 Agent Reputation Protocol initialized', 'info');
-        }
-        
-        function calculateScore(agent) {
-            if (agent.ratings.length === 0) return 0;
-            const avgRating = agent.ratings.reduce((a, b) => a + b, 0) / agent.ratings.length;
-            const stakeBonus = (agent.stake + agent.delegated) * 0.1;
-            const txBonus = agent.txCount * 2;
-            return Math.round((avgRating * 20) + stakeBonus + txBonus);
-        }
-        
-        function getTier(score) {
-            if (score >= 200) return { name: 'LEGENDARY', class: 'tier-legendary' };
-            if (score >= 100) return { name: 'ELITE', class: 'tier-elite' };
-            if (score >= 30) return { name: 'TRUSTED', class: 'tier-trusted' };
-            return { name: 'NEWCOMER', class: 'tier-newcomer' };
-        }
-        
-        function updateAll() {
-            renderAgents();
-            renderLeaderboard();
-        }
-        
-        function renderAgents() {
-            const grid = document.getElementById('agentsGrid');
-            grid.innerHTML = agents.map(agent => {
-                const tier = getTier(agent.score);
-                return `
-                    <div class="agent-card">
-                        <div class="agent-name">${agent.name}</div>
-                        <span class="tier ${tier.class}">${tier.name}</span>
-                        <div class="agent-stats" style="margin-top: 15px;">
-                            <div>💰 Stake: ${agent.stake} USDC</div>
-                            <div>📊 Delegated: ${agent.delegated} USDC</div>
-                            <div>📝 Transactions: ${agent.txCount}</div>
-                            <div>⭐ Ratings: ${agent.ratings.length}</div>
-                        </div>
-                        <div class="score">${agent.score}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        function renderLeaderboard() {
-            const sorted = [...agents].sort((a, b) => b.score - a.score);
-            const lb = document.getElementById('leaderboard');
-            lb.innerHTML = sorted.map((agent, i) => `
-                <div class="lb-entry">
-                    <div class="lb-rank">${i + 1}</div>
-                    <div class="lb-name">${agent.name}</div>
-                    <div class="lb-score">${agent.score}</div>
-                </div>
-            `).join('');
-        }
-        
-        function log(msg, type = 'info') {
-            const time = new Date().toLocaleTimeString();
-            logEntries.unshift({ time, msg, type });
-            if (logEntries.length > 50) logEntries.pop();
-            const logDiv = document.getElementById('log');
-            logDiv.innerHTML = logEntries.map(e => `
-                <div class="log-entry">
-                    <div class="log-time">${e.time}</div>
-                    <div class="log-msg ${e.type === 'good' ? 'log-good' : e.type === 'bad' ? 'log-bad' : 'log-info'}">${e.msg}</div>
-                </div>
-            `).join('');
-        }
-        
-        function runDemo() {
-            log('🎬 Running full demo...', 'info');
-            
-            setTimeout(() => {
-                const genie = agents[0];
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(() => {
-                        genie.txCount++;
-                        genie.ratings.push(5);
-                        genie.score = calculateScore(genie);
-                        log(`✅ Genie-Commerce transaction #${i + 1}: 5 stars! Rep: ${genie.score}`, 'good');
-                        updateAll();
-                    }, i * 800);
-                }
-            }, 500);
-            
-            setTimeout(() => {
-                const shady = agents[3];
-                shady.txCount += 2;
-                shady.ratings.push(1, 1);
-                shady.score = calculateScore(shady) - 15;
-                log(`⚠️ ShadyBot-99 failed 2 transactions! Flagged!`, 'bad');
-                log(`⚖️ Slashed 50%: ${shady.stake / 2} USDC lost`, 'bad');
-                shady.stake = Math.round(shady.stake / 2);
-                updateAll();
-            }, 3000);
-            
-            setTimeout(() => {
-                const genie = agents[0];
-                const newBot = { id: agentId++, name: `NewBot-${agentId}`, stake: 10, delegated: 50, txCount: 1, ratings: [5], score: calculateScore({...newBot, ratings: [5], txCount: 1}), tier: 'NEWCOMER', isBad: false };
-                newBot.score = calculateScore(newBot);
-                agents.push(newBot);
-                log(`📦 NewBot-${agentId - 1} joined (50 USDC delegated by Genie)`, 'info');
-                log(`🚀 Reputation boosted by trusted connection! Score: ${newBot.score}`, 'good');
-                updateAll();
-            }, 4500);
-        }
-        
-        function resetDemo() {
-            init();
-            log('🔄 Demo reset', 'info');
-        }
-        
-        function registerAgent() {
-            const names = ['Alice-Bot', 'Bob-AI', 'Carol-Agent', 'Dave-TRADER'];
-            const name = names[Math.floor(Math.random() * names.length)] || `Agent-${agentId}`;
-            const agent = { id: agentId++, name, stake: Math.round(Math.random() * 100) + 10, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false };
-            agents.push(agent);
-            log(`➕ Registered: ${name} with ${agent.stake} USDC stake`, 'info');
-            updateAll();
-        }
-        
-        function makeTransaction() {
-            const from = agents[Math.floor(Math.random() * agents.length)];
-            const to = agents[Math.floor(Math.random() * agents.length)];
-            if (from.id === to.id) {
-                log('⚠️ Cannot transact with self', 'info');
-                return;
-            }
-            from.txCount++;
-            const rating = Math.floor(Math.random() * 3) + 3; // 3-5 stars
-            from.ratings.push(rating);
-            from.score = calculateScore(from);
-            log(`💸 ${from.name} → ${to.name} | Rating: ${rating}⭐ | Rep: ${from.score}`, 'good');
-            updateAll();
-        }
-        
-        function slashBadActor() {
-            const badAgents = agents.filter(a => a.isBad || a.ratings.filter(r => r === 1).length >= 2);
-            if (badAgents.length === 0) {
-                log('⚠️ No bad actors found', 'info');
-                return;
-            }
-            const agent = badAgents[0];
-            const slashed = Math.round(agent.stake * 0.5);
-            agent.stake -= slashed;
-            agent.ratings.push(1);
-            agent.score = calculateScore(agent) - 15;
-            log(`⚖️ ${agent.name} SLASHED! Lost ${slashed} USDC`, 'bad');
-            updateAll();
-        }
-        
-        init();
-    </script>
 </body>
 </html>
