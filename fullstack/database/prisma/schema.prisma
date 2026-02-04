@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id              String   @id @default(cuid())
+  walletAddress   String   @unique @map("wallet_address")
+  name            String
+  description     String?
+  avatarUrl       String?  @map("avatar_url")
+  
+  // Reputation Scores
+  arpScore        Int      @default(0) @map("arp_score")
+  ethosScore      Int      @default(0) @map("ethos_score")
+  unifiedScore    Int      @default(0) @map("unified_score")
+  tier            Tier     @default(NEWCOMER)
+  
+  // Staking
+  totalStaked     Decimal  @default(0) @map("total_staked") @db.Decimal(20, 8)
+  delegatedStake  Decimal  @default(0) @map("delegated_stake") @db.Decimal(20, 8)
+  
+  // Stats
+  transactionCount Int     @default(0) @map("transaction_count")
+  ratingCount     Int      @default(0) @map("rating_count")
+  averageRating   Decimal  @default(0) @map("average_rating") @db.Decimal(3, 2)
+  
+  // Status
+  isVerified      Boolean  @default(false) @map("is_verified")
+  isActive        Boolean  @default(true) @map("is_active")
+  riskScore       Int      @default(50) @map("risk_score")
+  
+  // Timestamps
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  lastActiveAt    DateTime? @map("last_active_at")
+  
+  // Relations
+  transactions    Transaction[]
+  ratingsGiven    Rating[] @relation("RatingsGiven")
+  ratingsReceived Rating[] @relation("RatingsReceived")
+  delegators      Delegation[] @relation("Delegators")
+  delegatingTo    Delegation[] @relation("DelegatingTo")
+  
+  @@index([unifiedScore(sort: Desc)])
+  @@index([tier])
+  @@index([isActive])
+  @@index([walletAddress])
+  @@map("agents")
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  txHash          String   @unique @map("tx_hash")
+  
+  fromAgentId     String   @map("from_agent_id")
+  fromAgent       Agent    @relation(fields: [fromAgentId], references: [id], name: "TransactionsFrom")
+  
+  toAgentId       String   @map("to_agent_id")
+  toAgent         Agent    @relation(fields: [toAgentId], references: [id], name: "TransactionsTo")
+  
+  amount          Decimal  @db.Decimal(20, 8)
+  currency        String   @default("USDC")
+  
+  status          TransactionStatus @default(PENDING)
+  
+  // On-chain data
+  blockNumber     Int?     @map("block_number")
+  blockTimestamp  DateTime? @map("block_timestamp")
+  gasUsed         Int?     @map("gas_used")
+  
+  // Attestation
+  isAttested      Boolean  @default(false) @map("is_attested")
+  attestedAt      DateTime? @map("attested_at")
+  rating          Rating?
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  @@index([fromAgentId])
+  @@index([toAgentId])
+  @@index([status])
+  @@index([blockTimestamp(sort: Desc)])
+  @@map("transactions")
+}
+
+model Rating {
+  id              String   @id @default(cuid())
+  
+  transactionId   String   @unique @map("transaction_id")
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  fromAgentId     String   @map("from_agent_id")
+  fromAgent       Agent    @relation(fields: [fromAgentId], references: [id], name: "RatingsGiven")
+  
+  toAgentId       String   @map("to_agent_id")
+  toAgent         Agent    @relation(fields: [toAgentId], references: [id], name: "RatingsReceived")
+  
+  score           Int      // -5 to 5
+  feedback        String?
+  
+  // Impact on reputation
+  weight          Decimal  @default(1) @db.Decimal(3, 2)
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  @@index([toAgentId])
+  @@index([fromAgentId])
+  @@index([score])
+  @@map("ratings")
+}
+
+model Delegation {
+  id              String   @id @default(cuid())
+  
+  delegatorId     String   @map("delegator_id")
+  delegator       Agent    @relation(fields: [delegatorId], references: [id], name: "Delegators")
+  
+  delegateId      String   @map("delegate_id")
+  delegate        Agent    @relation(fields: [delegateId], references: [id], name: "DelegatingTo")
+  
+  amount          Decimal  @db.Decimal(20, 8)
+  
+  isActive        Boolean  @default(true) @map("is_active")
+  delegatedAt     DateTime @default(now()) @map("delegated_at")
+  undelegatedAt   DateTime? @map("undelegated_at")
+  
+  @@unique([delegatorId, delegateId, isActive])
+  @@index([delegateId])
+  @@map("delegations")
+}
+
+model EventLog {
+  id              String   @id @default(cuid())
+  
+  eventType       String   @map("event_type") // AgentRegistered, TransactionRecorded, etc.
+  contractAddress String   @map("contract_address")
+  
+  blockNumber     Int      @map("block_number")
+  blockHash       String   @map("block_hash")
+  transactionHash String   @map("transaction_hash")
+  logIndex        Int      @map("log_index")
+  
+  // Event data
+  fromAddress     String?  @map("from_address")
+  toAddress       String?  @map("to_address")
+  amount          Decimal? @db.Decimal(20, 8)
+  data            Json?    // Additional event parameters
+  
+  // Processing status
+  isProcessed     Boolean  @default(false) @map("is_processed")
+  processedAt     DateTime? @map("processed_at")
+  errorMessage    String?  @map("error_message")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  @@unique([transactionHash, logIndex])
+  @@index([eventType])
+  @@index([isProcessed])
+  @@index([blockNumber(sort: Desc)])
+  @@map("event_logs")
+}
+
+model Cache {
+  id        String   @id
+  value     Json
+  expiresAt DateTime? @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@index([expiresAt])
+  @@map("cache")
+}
+
+enum Tier {
+  NEWCOMER
+  TRUSTED
+  ESTABLISHED
+  ELITE
+  LEGENDARY
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  ATTESTED
+}
