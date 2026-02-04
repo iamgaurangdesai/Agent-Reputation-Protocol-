@@ -23,7 +23,9 @@
 4. **Deploy**
    - Environment: `Injected Provider - MetaMask`
    - Network: Base Sepolia
-   - Constructor argument: `0x036CbD53842c5426634e7929541eC2318f3dCF7e` (USDC)
+   - Constructor arguments: 
+     - `_usdcAddress`: `0x036CbD53842c5426634e7929541eC2318f3dCF7e` (USDC)
+     - `_initialOwner`: `YOUR_WALLET_ADDRESS` (your deployer address)
    - Click Deploy
 
 5. **Verify Contract**

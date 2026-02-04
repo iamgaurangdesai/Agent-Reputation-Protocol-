@@ -77,7 +77,7 @@ contract AgentReputationProtocol is Ownable, ReentrancyGuard {
         int8 finalRating;
     }
     
-    constructor(address _usdcAddress) {
+    constructor(address _usdcAddress, address _initialOwner) Ownable(_initialOwner) {
         usdc = IERC20(_usdcAddress);
         _initializeAgents();
     }
@@ -214,19 +214,22 @@ contract AgentReputationProtocol is Ownable, ReentrancyGuard {
         require(!transactions[txHash].attested, "Already attested");
         require(rating >= -5 && rating <= 5, "Invalid rating (-5 to 5)");
         
-        Transaction storage tx = transactions[txHash];
-        Agent storage toAgent = agents[tx.to];
+        Transaction storage txn = transactions[txHash];
+        Agent storage toAgent = agents[txn.to];
         
         toAgent.arpRatingsCount++;
-        toAgent.arpTotalRating += uint8(rating >= 0 ? rating : 0);
+        // Handle rating: only add positive ratings
+        if (rating > 0) {
+            toAgent.arpTotalRating += uint8(uint256(int256(rating)));
+        }
         
         uint256 avgRating = toAgent.arpTotalRating / toAgent.arpRatingsCount;
         // Score formula: ratings * 20 + stake_bonus + activity_bonus
         uint256 stakeBonus = toAgent.stake / (1 * 10**6); // 1 point per USDC
         toAgent.arpScore = (avgRating * 20) + stakeBonus + (toAgent.arpRatingsCount * 2);
         
-        tx.attested = true;
-        tx.finalRating = rating;
+        txn.attested = true;
+        txn.finalRating = rating;
         
         _updateUnifiedScore(tx.to);
         
