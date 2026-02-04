@@ -360,7 +360,7 @@
             <span>ARP Console</span>
         </div>
         <div id="walletSection">
-            <button id="connectWallet" onclick="connectWallet()">🔗 Connect Wallet</button>
+            <button id="connectWallet" onclick="connectWallet()" style="display: block !important; visibility: visible !important;">🔗 Connect Wallet</button>
         </div>
     </header>
 
@@ -538,8 +538,10 @@
         // Connect Wallet
         async function connectWallet() {
             try {
-                if (!window.ethereum) {
-                    showStatus('Please install MetaMask!', 'error');
+                // Check if MetaMask is installed
+                if (typeof window.ethereum === 'undefined') {
+                    showStatus('MetaMask not detected! Please install MetaMask extension.', 'error');
+                    window.open('https://metamask.io/download/', '_blank');
                     return;
                 }
 
@@ -573,7 +575,7 @@
                 showStatus('Wallet connected successfully!', 'success');
             } catch (error) {
                 console.error(error);
-                showStatus('Failed to connect wallet: ' + error.message, 'error');
+                showStatus('Failed to connect: ' + (error.message || 'Unknown error'), 'error');
             }
         }
 
