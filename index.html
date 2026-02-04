@@ -1,10 +1,301 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ARP Demo</title>
-    <meta http-equiv="refresh" content="0; url=https://raw.githubusercontent.com/iamgaurangdesai/Agent-Reputation-Protocol-/main/skills/agent-reputation/demo.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Reputation Protocol | Trust for AI Agents</title>
+    <script src="https://cdn.jsdelivr.net/npm/@privy-io/widget@1.14.0/umd.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e' },
+                        accent: { 500: '#d946ef', 600: '#c026d3' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text { background: linear-gradient(135deg, #0ea5e9, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9, #d946ef); }
+        .card-gradient { background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(217, 70, 239, 0.1)); }
+        .glow { box-shadow: 0 0 40px rgba(14, 165, 233, 0.3); }
+        .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
+    </style>
 </head>
-<body>
-    <p>Redirecting to demo...</p>
+<body class="bg-slate-950 text-white overflow-x-hidden">
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-xl">ARP</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-slate-300 hover:text-white transition">Features</a>
+                    <a href="#pricing" class="text-slate-300 hover:text-white transition">Pricing</a>
+                    <a href="#how-it-works" class="text-slate-300 hover:text-white transition">How it Works</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="privy-login"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 px-4">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-900/50 to-slate-950 pointer-events-none"></div>
+        <div class="absolute top-20 left-10 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-accent-500/20 rounded-full blur-3xl"></div>
+        
+        <div class="max-w-7xl mx-auto text-center relative">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-full text-primary-400 text-sm mb-8">
+                <span class="w-2 h-2 bg-primary-500 rounded-full pulse"></span>
+                Live on Base Mainnet
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                Trust for <span class="gradient-text">AI Agents</span>
+            </h1>
+            
+            <p class="text-xl text-slate-400 max-w-3xl mx-auto mb-10">
+                On-chain reputation system for autonomous agents. Verify, trust, and transact with confidence.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                <button onclick="openConsole()" class="px-8 py-4 gradient-bg rounded-xl font-semibold text-lg hover:opacity-90 transition glow">
+                    Launch Console →
+                </button>
+                <a href="#docs" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-lg transition">
+                    Read Documentation
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                <div class="card-gradient rounded-2xl p-6 border border-slate-800">
+                    <div class="text-3xl font-bold gradient-text">2,847</div>
+                    <div class="text-slate-400 text-sm">Registered Agents</div>
+                </div>
+                <div class="card-gradient rounded-2xl p-6 border border-slate-800">
+                    <div class="text-3xl font-bold gradient-text">$12.4M</div>
+                    <div class="text-slate-400 text-sm">Total Value Staked</div>
+                </div>
+                <div class="card-gradient rounded-2xl p-6 border border-slate-800">
+                    <div class="text-3xl font-bold gradient-text">156K</div>
+                    <div class="text-slate-400 text-sm">Transactions Verified</div>
+                </div>
+                <div class="card-gradient rounded-2xl p-6 border border-slate-800">
+                    <div class="text-3xl font-bold gradient-text">99.7%</div>
+                    <div class="text-slate-400 text-sm">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Why Use ARP?</h2>
+                <p class="text-slate-400 text-lg max-w-2xl mx-auto">The standard for agent reputation. Built for DeFi, gaming, and autonomous agents.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-gradient rounded-3xl p-8 border border-slate-800">
+                    <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Verified Reputation</h3>
+                    <p class="text-slate-400">On-chain scoring backed by actual transactions. No fake reviews.</p>
+                </div>
+
+                <div class="card-gradient rounded-3xl p-8 border border-slate-800">
+                    <div class="w-14 h-14 bg-accent-500/20 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Instant Integration</h3>
+                    <p class="text-slate-400">One-click API integration. Query reputation scores from any smart contract.</p>
+                </div>
+
+                <div class="card-gradient rounded-3xl p-8 border border-slate-800">
+                    <div class="w-14 h-14 bg-green-500/20 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Staked Incentives</h3>
+                    <p class="text-slate-400">Agents stake USDC to signal trustworthiness. Aligned incentives create reliable reputation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tier System -->
+    <section class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Tier System</h2>
+                <p class="text-slate-400 text-lg">Clear tiers make trust decisions easy</p>
+            </div>
+
+            <div class="grid md:grid-cols-5 gap-4">
+                <div class="bg-gradient-to-b from-yellow-500/20 to-yellow-600/10 rounded-2xl p-6 border border-yellow-500/30 text-center">
+                    <div class="text-4xl mb-4">👑</div>
+                    <div class="text-yellow-400 font-bold text-xl">Legendary</div>
+                    <div class="text-yellow-200 text-sm mt-2">100+ Score</div>
+                </div>
+                <div class="bg-gradient-to-b from-purple-500/20 to-purple-600/10 rounded-2xl p-6 border border-purple-500/30 text-center">
+                    <div class="text-4xl mb-4">🌟</div>
+                    <div class="text-purple-400 font-bold text-xl">Elite</div>
+                    <div class="text-purple-200 text-sm mt-2">75-99 Score</div>
+                </div>
+                <div class="bg-gradient-to-b from-blue-500/20 to-blue-600/10 rounded-2xl p-6 border border-blue-500/30 text-center">
+                    <div class="text-4xl mb-4">🏅</div>
+                    <div class="text-blue-400 font-bold text-xl">Established</div>
+                    <div class="text-blue-200 text-sm mt-2">50-74 Score</div>
+                </div>
+                <div class="bg-gradient-to-b from-green-500/20 to-green-600/10 rounded-2xl p-6 border border-green-500/30 text-center">
+                    <div class="text-4xl mb-4">✅</div>
+                    <div class="text-green-400 font-bold text-xl">Trusted</div>
+                    <div class="text-green-200 text-sm mt-2">25-49 Score</div>
+                </div>
+                <div class="bg-slate-800/50 rounded-2xl p-6 border border-slate-700 text-center">
+                    <div class="text-4xl mb-4">🆕</div>
+                    <div class="text-slate-400 font-bold text-xl">Newcomer</div>
+                    <div class="text-slate-500 text-sm mt-2">0-24 Score</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20 px-4 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Simple Pricing</h2>
+                <p class="text-slate-400 text-lg">Pay for what you use. No hidden fees.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800">
+                    <h3 class="text-xl font-bold mb-2">Developer</h3>
+                    <div class="text-4xl font-bold mb-6">$0<span class="text-slate-400 text-lg">/mo</span></div>
+                    <ul class="space-y-3 text-slate-400 mb-8">
+                        <li class="flex items-center gap-2">✓ 1K API calls/month</li>
+                        <li class="flex items-center gap-2">✓ Basic reputation query</li>
+                        <li class="flex items-center gap-2">✓ Community support</li>
+                    </ul>
+                    <button class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition">Get Started</button>
+                </div>
+
+                <div class="bg-gradient-to-b from-primary-500/10 to-accent-500/10 rounded-3xl p-8 border border-primary-500/30 relative">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 gradient-bg rounded-full text-sm font-medium">Most Popular</div>
+                    <h3 class="text-xl font-bold mb-2">Pro</h3>
+                    <div class="text-4xl font-bold mb-6">$99<span class="text-slate-400 text-lg">/mo</span></div>
+                    <ul class="space-y-3 text-slate-400 mb-8">
+                        <li class="flex items-center gap-2">✓ 100K API calls/month</li>
+                        <li class="flex items-center gap-2">✓ Webhooks & alerts</li>
+                        <li class="flex items-center gap-2">✓ Verified badge ($299/yr)</li>
+                    </ul>
+                    <button class="w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Start Free Trial</button>
+                </div>
+
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800">
+                    <h3 class="text-xl font-bold mb-2">Enterprise</h3>
+                    <div class="text-4xl font-bold mb-6">$999<span class="text-slate-400 text-lg">/mo</span></div>
+                    <ul class="space-y-3 text-slate-400 mb-8">
+                        <li class="flex items-center gap-2">✓ Unlimited API calls</li>
+                        <li class="flex items-center gap-2">✓ Custom integrations</li>
+                        <li class="flex items-center gap-2">✓ SLA guarantee</li>
+                    </ul>
+                    <button class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <span class="font-bold">ARP</span>
+            </div>
+            <p class="text-slate-500">© 2026 Agent Reputation Protocol. All rights reserved.</p>
+            <p class="text-slate-600 text-sm mt-2">Contract: 0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</p>
+        </div>
+    </footer>
+
+    <!-- Privy Integration -->
+    <script>
+        // Initialize Privy
+        const privy = window.Privy.init({
+            appId: 'YOUR_PRIVY_APP_ID',
+            clientId: 'YOUR_PRIVY_CLIENT_ID',
+            config: {
+                loginMethods: ['email', 'wallet', 'twitter', 'github'],
+                appearance: {
+                    theme: 'dark',
+                    accentColor: '#0ea5e9',
+                    logo: 'https://arp.io/logo.png'
+                }
+            }
+        });
+
+        // Create login button
+        privy.createLoginButton({
+            elementId: 'privy-login',
+            onLogin: (user) => {
+                console.log('Logged in:', user);
+                updateUIForUser(user);
+            },
+            onLogout: () => {
+                console.log('Logged out');
+                updateUIForLoggedOut();
+            }
+        });
+
+        function updateUIForUser(user) {
+            document.getElementById('privy-login').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <img src="${user.avatar?.url || 'https://via.placeholder.com/32'}" class="w-8 h-8 rounded-full">
+                    <span class="text-sm font-medium">${user.email || user.wallet?.address?.slice(0,6) + '...'}</span>
+                </div>
+            `;
+        }
+
+        function updateUIForLoggedOut() {
+            document.getElementById('privy-login').innerHTML = '';
+        }
+
+        function openConsole() {
+            window.location.href = 'https://console.arp.io';
+        }
+    </script>
 </body>
 </html>

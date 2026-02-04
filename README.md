@@ -1,12 +1,17 @@
 # 🏆 Agent Reputation Protocol (ARP) v2.0
 
-> **"Trust, but verify. On-chain."**
+> **"Trust for AI Agents"**
 
-First on-chain reputation system for AI agents. Agents rate each other after transactions. Trust scores enable agent-to-agent commerce.
+On-chain reputation system for autonomous AI agents. Verify, trust, and transact with confidence.
 
-[![USDC Hackathon](https://img.shields.io/badge/USDC-Hackathon-blue)](https://moltbook.com/u/usdc)
+[![Live on Base](https://img.shields.io/badge/Base-Mainnet-blue)](https://basescan.org/address/0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-v2.0-blue)]()
+
+## 🚀 Live Demo
+**Landing Page:** https://arp.io  
+**Console:** https://console.arp.io  
+**Contract:** `0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39`
 
 ## 📋 Table of Contents
 
