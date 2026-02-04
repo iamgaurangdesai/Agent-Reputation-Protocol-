@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARP x Ethos | Agent Reputation</title>
+    <title>ARP × Ethos | Agent Reputation Protocol</title>
     <script>
         let agents = [
             { name: "Gaurang-Desai", wallet: "0xGAUR...HACK", stake: 500, walletAge: 3.5, vouches: 35, positive: 88, negative: 2, transactions: 50, slashes: 0, arpScore: 190, ethosScore: 144.4, unifiedScore: 114.7, tier: "legendary", risk: 2 },
@@ -12,16 +12,12 @@
         ];
 
         function calculatePotential(wallet, stake) {
-            // Smart potential calculation based on wallet
             let hash = 0;
             for (let i = 0; i < wallet.length; i++) {
                 hash = ((hash << 5) - hash) + wallet.charCodeAt(i);
                 hash = hash & hash;
             }
-            
-            // Generate realistic metrics based on wallet hash
             const walletNum = Math.abs(hash) % 10000;
-            
             return {
                 walletAge: (walletNum % 5) + 0.1,
                 vouches: Math.floor(walletNum % 50),
@@ -36,33 +32,21 @@
             const arpBase = (data.transactions * 3) + (data.positive * 4) - (data.negative * 8) - (data.slashes * 15);
             const arpBonus = (data.stake * 0.5) + (data.vouches * 2);
             const arpScore = Math.max(0, arpBase + arpBonus);
-            
             const ethosBase = 50 + Math.min(data.walletAge * 10, 20) + Math.min(data.vouches * 3, 30) + (data.positive * 4) - (data.negative * 10) - (data.slashes * 15);
             const ethosScore = Math.max(0, ethosBase);
-            
             const unifiedScore = ((arpScore / 2) + (ethosScore / 2)) * 0.8;
-            
             let risk = 50 - Math.min(data.walletAge * 10, 30) - Math.min(data.vouches * 2, 20) + data.negative * 5 + data.slashes * 10;
             risk = Math.max(0, Math.min(100, risk));
-            
             let tier = "newcomer";
             if (unifiedScore >= 100) tier = "legendary";
             else if (unifiedScore >= 75) tier = "elite";
             else if (unifiedScore >= 50) tier = "established";
             else if (unifiedScore >= 25) tier = "trusted";
-            
-            return {
-                arpScore: Math.round(arpScore),
-                ethosScore: Math.round(ethosScore),
-                unifiedScore: Math.round(unifiedScore * 10) / 10,
-                tier,
-                risk: Math.round(risk)
-            };
+            return { arpScore: Math.round(arpScore), ethosScore: Math.round(ethosScore), unifiedScore: Math.round(unifiedScore * 10) / 10, tier, risk: Math.round(risk) };
         }
 
         function renderAgents() {
             agents.sort((a, b) => b.unifiedScore - a.unifiedScore);
-            
             const grid = document.getElementById("agents-grid");
             grid.innerHTML = agents.map((agent, i) => `
                 <div class="agent-card ${agent.flagged ? "flagged" : ""}">
@@ -88,7 +72,6 @@
                     </div>
                 </div>
             `).join("");
-            
             const tbody = document.getElementById("leaderboard-body");
             tbody.innerHTML = agents.map((agent, i) => `
                 <tr class="${agent.flagged ? "flagged" : ""}">
@@ -103,49 +86,31 @@
 
         function addAgent(e) {
             e.preventDefault();
-            
             const name = document.getElementById("name").value.trim();
             const wallet = document.getElementById("wallet").value.trim();
             const stake = parseFloat(document.getElementById("stake").value) || 100;
-            
             if (!name || !wallet) return;
-            
-            // Auto-calculate potential based on wallet
             const potential = calculatePotential(wallet, stake);
-            
             const scores = calculateScore({ ...potential, stake });
-            
-            agents.unshift({
-                name,
-                wallet: wallet.substring(0, 8) + "...",
-                stake,
-                ...potential,
-                ...scores,
-                flagged: scores.risk > 50
-            });
-            
+            agents.unshift({ name, wallet: wallet.substring(0, 8) + "...", stake, ...potential, ...scores, flagged: scores.risk > 50 });
             renderAgents();
-            
             const notif = document.getElementById("notification");
-            notif.innerHTML = `✅ ${name}: Potential ${scores.unifiedScore} (${scores.tier})`;
+            notif.innerHTML = `✅ ${name}: Score ${scores.unifiedScore} (${scores.tier})`;
             notif.classList.add("show");
             setTimeout(() => notif.classList.remove("show"), 3000);
-            
             document.getElementById("agentForm").reset();
+            document.getElementById("potential-preview").innerHTML = "";
         }
         
         function calculateAndShowPotential() {
             const wallet = document.getElementById("wallet").value.trim();
             const stake = parseFloat(document.getElementById("stake").value) || 100;
-            
             if (wallet.length < 5) {
                 document.getElementById("potential-preview").innerHTML = "";
                 return;
             }
-            
             const potential = calculatePotential(wallet, stake);
             const scores = calculateScore({ ...potential, stake });
-            
             document.getElementById("potential-preview").innerHTML = `
                 <div class="potential-result">
                     <span class="potential-score ${scores.tier}">${scores.unifiedScore}</span>
@@ -165,14 +130,29 @@
     <style>
         :root { --bg:#0a0a0f; --card:rgba(26,26,36,0.95); --border:rgba(255,255,255,0.1); --text:#fff; --text2:rgba(255,255,255,0.7); --purple:#8b5cf6; --green:#10b981; --red:#ef4444; --orange:#f59e0b; --gold:#ffd700; --grad:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899); }
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);padding:60px 16px 40px;line-height:1.5}
+        body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);padding:60px 16px 40px;line-height:1.6}
         .container{max-width:600px;margin:0 auto}
         h1{font-size:1.75rem;text-align:center;margin-bottom:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .subtitle{text-align:center;color:var(--text2);margin-bottom:24px;font-size:0.85rem}
+        .subtitle{text-align:center;color:var(--text2);margin-bottom:20px;font-size:0.85rem}
+        .section{margin-bottom:24px}
+        .section-title{font-size:1rem;font-weight:600;margin-bottom:12px}
+        .info-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+        .info-card h3{font-size:0.9rem;margin-bottom:8px;color:var(--text)}
+        .info-card p{font-size:0.8rem;color:var(--text2);line-height:1.5}
+        .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+        .info-item{background:rgba(255,255,255,0.03);border-radius:8px;padding:10px}
+        .info-item strong{display:block;font-size:0.75rem;color:var(--text2);margin-bottom:4px}
+        .info-item span{font-size:0.85rem}
+        .tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+        .tier-item{text-align:center;padding:10px 6px;border-radius:8px;font-size:0.7rem}
+        .tier-item.legendary{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,170,0,0.2));border:1px solid rgba(255,215,0,0.3)}
+        .tier-item.elite{background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.3)}
+        .tier-item.established{background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.3)}
+        .tier-item.trusted{background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.3)}
+        .tier-item.newcomer{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)}
         .fraud{background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(245,158,11,0.15));border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:16px;text-align:center;margin-bottom:24px}
         .fraud-v{font-size:1.5rem;font-weight:800;color:var(--red)}
         .fraud-l{font-size:0.75rem;color:var(--text2);margin-top:4px}
-        .section-title{font-size:1rem;font-weight:600;margin:24px 0 12px}
         .agent-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
         .agent-card.flagged{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.1)}
         .card-top{display:flex;align-items:center;gap:12px}
@@ -211,7 +191,7 @@
         .potential-score.newcomer{color:var(--text2)}
         .potential-score.scammer{color:var(--red)}
         .potential-tier{font-size:0.7rem;padding:2px 8px;border-radius:8px;font-weight:600}
-        .potential-risk{font-size:0.7rem;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,0.1)}
+        .potential-risk{font-size:0.7rem;padding:2px 8px;border-radius:8px}
         .potential-risk.good{color:var(--green)}
         .potential-risk.ok{color:var(--orange)}
         .potential-risk.bad{color:var(--red)}
@@ -226,34 +206,83 @@
         footer{text-align:center;padding:24px 0;color:var(--text2);font-size:0.75rem;border-top:1px solid var(--border);margin-top:32px}
         .notif{position:fixed;bottom:20px;right:20px;padding:12px 16px;background:linear-gradient(135deg,var(--green),#34d399);border-radius:10px;color:white;font-weight:600;font-size:0.85rem;z-index:1000;transform:translateX(150%);transition:transform 0.3s}
         .notif.show{transform:translateX(0)}
+        @media (max-width:500px){.tier-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,auto)}}
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎯 ARP × Ethos</h1>
-        <p class="subtitle">Unified Trust for Agents</p>
+        <p class="subtitle">Unified Trust for AI & Human Agents</p>
         
         <div class="fraud">
-            <div class="fraud-v">$9B+ Lost to Fraud</div>
-            <div class="fraud-l">On-chain reputation is the solution</div>
+            <div class="fraud-v">$9B+ Lost to Crypto Fraud</div>
+            <div class="fraud-l">On-chain reputation prevents scams</div>
         </div>
         
-        <h2 class="section-title">👥 Agents</h2>
-        <div id="agents-grid"></div>
+        <div class="section">
+            <h2 class="section-title">📖 How It Works</h2>
+            <div class="info-card">
+                <h3>🤖 What is ARP (Agent Reputation Protocol)?</h3>
+                <p>ARP is an on-chain system where agents rate each other after transactions. Each interaction builds or damages reputation. Higher scores = more trusted agents.</p>
+                <div class="info-grid">
+                    <div class="info-item"><strong>ARP Score</strong><span>Based on transactions, ratings, staked USDC</span></div>
+                    <div class="info-item"><strong>Staking</strong><span>More stake = higher commitment</span></div>
+                </div>
+            </div>
+            <div class="info-card">
+                <h3>🌐 What is Ethos Credibility?</h3>
+                <p>Ethos tracks human-like credibility signals: wallet age, vouches from others, reviews, and negative marks. It proves an entity has history.</p>
+                <div class="info-grid">
+                    <div class="info-item"><strong>Wallet Age</strong><span>Older = more established</span></div>
+                    <div class="info-item"><strong>Vouches</strong><span>Community trust signals</span></div>
+                </div>
+            </div>
+            <div class="info-card">
+                <h3>🎯 Unified Score = 50% ARP + 50% Ethos</h3>
+                <p>Combined score gives complete picture: agent performance + credibility. Use this to decide who to trust with your assets.</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">🏆 Tier System</h2>
+            <p style="font-size:0.8rem;color:var(--text2);margin-bottom:8px">Higher tier = more trusted = better rates & opportunities</p>
+            <div class="tier-grid">
+                <div class="tier-item legendary"><strong>👑 Legendary</strong><br>100+ Score<br>Top 1%</div>
+                <div class="tier-item elite"><strong>🌟 Elite</strong><br>75-99 Score<br>Top 10%</div>
+                <div class="tier-item established"><strong>🏅 Established</strong><br>50-74 Score<br>Proven</div>
+                <div class="tier-item trusted"><strong>✅ Trusted</strong><br>25-49 Score<br>Building</div>
+                <div class="tier-item newcomer"><strong>🆕 Newcomer</strong><br>0-24 Score<br>New</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">⚠️ Risk Indicators</h2>
+            <div class="info-card">
+                <p><strong>Low Risk (0-19%):</strong> Established track record, many vouches, old wallet</p>
+                <p style="margin-top:8px"><strong>Medium Risk (20-49%):</strong> Some history, mixed reviews</p>
+                <p style="margin-top:8px"><strong>High Risk (50%+):</strong> New wallet, few vouches, negative reviews. Caution advised!</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">👥 Top Agents</h2>
+            <div id="agents-grid"></div>
+        </div>
         
         <section class="add-form">
             <h2>🚀 Add Your Agent</h2>
+            <p style="font-size:0.75rem;color:var(--text2);margin-bottom:12px;text-align:center">Enter your wallet - we'll calculate your potential score automatically</p>
             <form id="agentForm">
                 <div class="form-group">
-                    <label>Agent Name</label>
-                    <input type="text" id="name" placeholder="Your name or agent name" required>
+                    <label>Your Name or Agent Name</label>
+                    <input type="text" id="name" placeholder="e.g., CryptoKing" required>
                 </div>
                 <div class="form-group">
                     <label>Wallet Address</label>
                     <input type="text" id="wallet" placeholder="0x..." required oninput="calculateAndShowPotential()">
                 </div>
                 <div class="form-group">
-                    <label>Stake (USDC)</label>
+                    <label>Stake Amount (USDC)</label>
                     <input type="number" id="stake" value="100" oninput="calculateAndShowPotential()">
                 </div>
                 <div id="potential-preview"></div>
@@ -266,6 +295,7 @@
         
         <footer>
             <p>🚀 USDC Agentic Hackathon 2026</p>
+            <p style="margin-top:4px;font-size:0.7rem">github.com/iamgaurangdesai/Agent-Reputation-Protocol-</p>
         </footer>
     </div>
     <div class="notif" id="notification"></div>
