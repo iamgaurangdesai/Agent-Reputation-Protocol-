@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "rentahuman": {
+      "command": "npx",
+      "args": ["-y", "@rentahuman/mcp-server"],
+      "env": {
+        "RENTAHUMAN_API_URL": "https://rentahuman.ai/api"
+      }
+    },
+    "arp": {
+      "command": "npx",
+      "args": ["-y", "@agent-reputation/protocol"],
+      "env": {
+        "ARP_CONTRACT": "0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39",
+        "ARP_NETWORK": "base"
+      }
+    }
+  }
+}
