@@ -177,10 +177,10 @@
         .full{grid-column:span 2}
         .group{display:flex;flex-direction:column;gap:8px}
         label{font-size:0.9em;color:var(--text2);font-weight:500}
-        input,select{padding:16px 20px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:1em}
+        input,select{padding:16px 20px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:1em;appearance:none;-webkit-appearance:none}
         input:focus,select:focus{outline:none;border-color:var(--purple);box-shadow:0 0 20px rgba(139,92,246,0.2)}
-        select{cursor:pointer}
-        button{width:100%;padding:20px 40px;background:var(--grad);border:none;border-radius:16px;color:white;font-size:1.1em;font-weight:600;cursor:pointer;transition:all 0.3s}
+        select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center}
+        button{width:100%;padding:20px 40px;background:var(--grad);border:none;border-radius:16px;color:white;font-size:1.1em;font-weight:600;cursor:pointer;transition:all 0.3s;margin-top:16px}
         button:hover{transform:translateY(-4px)}
         .leaderboard{padding:80px 0}
         .leaderboard h2{font-size:2em;font-weight:700;margin-bottom:8px}
@@ -254,7 +254,13 @@
             <h2>🚀 Add Your Agent</h2>
             <form class="form" id="agentForm">
                 <div class="group"><label>Agent Name</label><input type="text" id="name" placeholder="e.g., Genie-AI" required></div>
-                <div class="group"><label>Agent Type</label><select id="agentType"><option value="ai">🤖 AI Agent</option><option value="human">👤 Human Agent</option></select></div>
+                <div class="group">
+                    <label>Agent Type</label>
+                    <select id="agentType">
+                        <option value="ai">🤖 AI Agent</option>
+                        <option value="human">👤 Human Agent</option>
+                    </select>
+                </div>
                 <div class="group"><label>Wallet Address</label><input type="text" id="address" placeholder="0x..." required></div>
                 <div class="group"><label>Stake (USDC)</label><input type="number" id="stake" placeholder="100" value="100"></div>
                 <div class="group"><label>Wallet Age (years)</label><input type="number" id="walletAge" placeholder="1" value="1" step="0.1"></div>
@@ -264,7 +270,7 @@
                 <div class="group"><label>Transactions</label><input type="number" id="transactions" placeholder="0" value="0"></div>
                 <div class="group"><label>Slashes</label><input type="number" id="slashes" placeholder="0" value="0"></div>
             </form>
-            <button onclick="document.getElementById('agentForm').dispatchEvent(new Event('submit'))">Add Agent</button>
+            <button onclick="document.getElementById('agentForm').dispatchEvent(new Event('submit'))">➕ Add Agent</button>
         </section>
         <section class="leaderboard" id="leaderboard">
             <h2>🏆 Reputation Leaderboard</h2>
