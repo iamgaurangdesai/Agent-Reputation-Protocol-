@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@privy-io/react-auth@1.63.0/dist/index.umd.js"></script>
     <!-- Ethers.js -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -537,7 +537,20 @@
         let userAddress = null;
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Wait for ethers to load
+            let retries = 0;
+            while (typeof ethers === 'undefined' && retries < 10) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                retries++;
+            }
+            
+            if (typeof ethers === 'undefined') {
+                console.error('Ethers.js failed to load');
+                showStatus('Failed to load Web3 library. Please refresh the page.', 'error');
+                return;
+            }
+            
             loadLeaderboard();
             
             // Check if wallet was previously connected
@@ -549,9 +562,16 @@
         // Connect Wallet
         async function connectWallet() {
             try {
+                // Check if ethers is loaded
+                if (typeof ethers === 'undefined') {
+                    showStatus('Loading Web3 library... please wait a moment and try again', 'info');
+                    // Try to reload the page if ethers isn't loaded
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+                
                 if (typeof window.ethereum === 'undefined') {
-                    showStatus('Please install MetaMask or use a Web3 wallet!', 'error');
-                    // Open Privy login modal would go here
+                    showStatus('Please install MetaMask: https://metamask.io/download', 'error');
                     return;
                 }
 
