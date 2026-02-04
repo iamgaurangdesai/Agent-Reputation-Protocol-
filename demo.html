@@ -3,733 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎯 ARP x Ethos | Agent Reputation Protocol</title>
+    <title>ARP x Ethos | Agent Reputation Protocol</title>
+    <script>
+        let agents = [
+            { name: "Gaurang-Desai", type: "human", address: "0xGAUR...HACK", stake: 500, walletAge: 3.5, vouches: 35, positiveReviews: 88, negativeReviews: 2, transactions: 50, slashes: 0, arpScore: 190, ethosScore: 144.4, unifiedScore: 114.7, tier: "legendary", risk: 2 },
+            { name: "Trustworthy-Alice", type: "human", address: "0xTRU...LICE", stake: 200, walletAge: 4.0, vouches: 40, positiveReviews: 75, negativeReviews: 1, transactions: 40, slashes: 0, arpScore: 112, ethosScore: 144.7, unifiedScore: 72.2, tier: "established", risk: 2 },
+            { name: "Agent-Genius", type: "ai", address: "0xGEN...IUS", stake: 50, walletAge: 1.0, vouches: 10, positiveReviews: 25, negativeReviews: 1, transactions: 25, slashes: 0, arpScore: 75, ethosScore: 100, unifiedScore: 62.5, tier: "established", risk: 10 },
+            { name: "ScamBot-Eve", type: "ai", address: "0xSCAM...EVE", stake: 5, walletAge: 0.05, vouches: 0, positiveReviews: 1, negativeReviews: 15, transactions: 5, slashes: 5, arpScore: 11, ethosScore: 0, unifiedScore: 5.6, tier: "scammer", risk: 90, flagged: true }
+        ];
+
+        function calculateScore(stake, walletAge, vouches, positive, negative, transactions, slashes, type) {
+            let arpBase = (transactions * 3) + (positive * 4) - (negative * 8) - (slashes * 15);
+            let arpBonus = (stake * 0.5) + (vouches * 2);
+            let arpScore = Math.max(0, arpBase + arpBonus);
+            let ethosBase = 50 + Math.min(walletAge * 10, 20) + Math.min(vouches * 3, 30) + (positive * 4) - (negative * 10) - (slashes * 15);
+            let ethosScore = Math.max(0, ethosBase);
+            let unifiedScore = ((arpScore / 2) + (ethosScore / 2)) * 0.8;
+            let risk = 50 - Math.min(walletAge * 10, 30) - Math.min(vouches * 2, 20) + negative * 5 + slashes * 10 + (type === "ai" ? 10 : 0);
+            risk = Math.max(0, Math.min(100, risk));
+            let tier = "newcomer";
+            if (unifiedScore >= 100) tier = "legendary";
+            else if (unifiedScore >= 75) tier = "elite";
+            else if (unifiedScore >= 50) tier = "established";
+            else if (unifiedScore >= 25) tier = "trusted";
+            return { arpScore: Math.round(arpScore), ethosScore: Math.round(ethosScore), unifiedScore: Math.round(unifiedScore * 10) / 10, tier, risk: Math.round(risk) };
+        }
+
+        function renderAgents() {
+            agents.sort((a, b) => b.unifiedScore - a.unifiedScore);
+            const grid = document.getElementById("agents-grid");
+            const leaderboard = document.getElementById("leaderboard-body");
+            
+            grid.innerHTML = agents.map((agent) => `
+                <div class="agent-card ${agent.type} ${agent.flagged ? "flagged" : ""}">
+                    <div class="agent-header">
+                        <div class="agent-profile">
+                            <div class="agent-avatar" style="background: ${agent.flagged ? "#ef4444" : agent.type === "human" ? "#10b981" : "#8b5cf6"}">${agent.flagged ? "🚫" : agent.type === "human" ? "👤" : "🤖"}</div>
+                            <div><div class="agent-name">${agent.name}</div><div class="agent-address">${agent.address}</div><span class="agent-type ${agent.type}">${agent.type === "ai" ? "🤖 AI" : "👤 Human"}</span></div>
+                        </div>
+                        <div class="tier-badge tier-${agent.tier}">${agent.tier === "legendary" ? "👑" : agent.tier === "elite" ? "🌟" : agent.tier === "established" ? "🏅" : agent.tier === "trusted" ? "✅" : agent.tier === "scammer" ? "⚠️" : "🆕"} ${agent.tier}</div>
+                    </div>
+                    <div style="text-align:center;margin:20px 0"><div style="font-size:3em;font-weight:800;${agent.flagged ? "color:#ef4444" : "background:var(--gradient-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent"}">${agent.unifiedScore}</div><div style="color:var(--text-muted)">Unified Score</div></div>
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px">
+                        <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:12px"><div style="color:var(--text-muted);font-size:0.8em">💰 Stake</div><div style="font-weight:600">${agent.stake} USDC</div></div>
+                        <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:12px"><div style="color:var(--text-muted);font-size:0.8em">📅 Wallet</div><div style="font-weight:600">${agent.walletAge}y</div></div>
+                        <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:12px"><div style="color:var(--text-muted);font-size:0.8em">👍 Vouches</div><div style="font-weight:600">${agent.vouches}</div></div>
+                        <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:12px"><div style="color:var(--text-muted);font-size:0.8em">⭐ Reviews</div><div style="font-weight:600">+${agent.positiveReviews}/-${agent.negativeReviews}</div></div>
+                    </div>
+                    <div class="risk-meter"><div class="risk-label"><span>🚨 Risk</span><span style="${agent.risk < 20 ? "color:#10b981" : agent.risk < 50 ? "color:#f59e0b" : "color:#ef4444"}">${agent.risk}%</span></div><div class="risk-bar"><div class="risk-fill ${agent.risk < 20 ? "risk-low" : agent.risk < 50 ? "risk-medium" : "risk-high"}" style="width:${agent.risk}%"></div></div></div>
+                    ${agent.flagged ? '<div style="margin-top:16px;padding:16px;background:rgba(239,68,68,0.2);border-radius:12px;text-align:center"><strong style="color:#ef4444">🚫 BLACKLISTED</strong></div>' : ''}
+                </div>
+            `).join("");
+            
+            leaderboard.innerHTML = agents.map((agent, i) => `
+                <tr class="leaderboard-row ${agent.flagged ? "scammer" : ""} ${agent.type === "human" ? "human" : ""}">
+                    <td><span class="rank ${i<3?"rank-"+(i+1):""}">${i+1}</span></td>
+                    <td><div class="agent-cell"><div class="agent-cell-avatar" style="background:${agent.flagged ? "#ef4444" : agent.type === "human" ? "#10b981" : "#8b5cf6"}">${agent.flagged ? "🚫" : agent.type === "human" ? "👤" : "🤖"}</div><div><div style="font-weight:600">${agent.name}</div><div style="font-size:0.8em;color:var(--text-muted)">${agent.address}</div></div></div></td>
+                    <td>${agent.arpScore}</td>
+                    <td>${agent.ethosScore}</td>
+                    <td class="unified-score">${agent.unifiedScore}</td>
+                    <td><span class="tier-badge tier-${agent.tier}">${agent.tier}</span></td>
+                    <td>${agent.flagged ? '<span style="color:#ef4444">🚫 Banned</span>' : '<span style="color:#10b981">✅ Active</span>'}</td>
+                </tr>
+            `).join("");
+        }
+
+        function addAgent(e) {
+            e.preventDefault();
+            const scores = calculateScore(
+                parseFloat(document.getElementById("stake").value) || 100,
+                parseFloat(document.getElementById("walletAge").value) || 1,
+                parseInt(document.getElementById("vouches").value) || 0,
+                parseInt(document.getElementById("positive").value) || 0,
+                parseInt(document.getElementById("negative").value) || 0,
+                parseInt(document.getElementById("transactions").value) || 0,
+                parseInt(document.getElementById("slashes").value) || 0,
+                document.getElementById("agentType").value
+            );
+            agents.unshift({
+                name: document.getElementById("name").value,
+                type: document.getElementById("agentType").value,
+                address: document.getElementById("address").value.substring(0,10) + "...",
+                stake: parseFloat(document.getElementById("stake").value) || 100,
+                walletAge: parseFloat(document.getElementById("walletAge").value) || 1,
+                vouches: parseInt(document.getElementById("vouches").value) || 0,
+                positiveReviews: parseInt(document.getElementById("positive").value) || 0,
+                negativeReviews: parseInt(document.getElementById("negative").value) || 0,
+                transactions: parseInt(document.getElementById("transactions").value) || 0,
+                slashes: parseInt(document.getElementById("slashes").value) || 0,
+                ...scores
+            });
+            renderAgents();
+            const notif = document.getElementById("notification");
+            notif.innerHTML = `✅ ${document.getElementById("name").value} added! Score: ${scores.unifiedScore}`;
+            notif.classList.add("show");
+            setTimeout(() => notif.classList.remove("show"), 3000);
+            document.getElementById("agentForm").reset();
+        }
+        document.addEventListener("DOMContentLoaded", () => { renderAgents(); document.getElementById("agentForm").addEventListener("submit", addAgent); });
+    </script>
     <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: rgba(26, 26, 36, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.5);
-            --accent-blue: #3b82f6;
-            --accent-pink: #ec4899;
-            --accent-purple: #8b5cf6;
-            --accent-cyan: #06b6d4;
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --gradient-hero: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-            --gradient-float: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        html { scroll-behavior: smooth; }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-        
-        /* Floating Particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        
-        .particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: var(--gradient-float);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: float 20s infinite ease-in-out;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.3; }
-            90% { opacity: 0.3; }
-            100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); opacity: 0; }
-        }
-        
-        .particle:nth-child(1) { left: 5%; animation-delay: 0s; animation-duration: 25s; }
-        .particle:nth-child(2) { left: 15%; animation-delay: 3s; animation-duration: 22s; }
-        .particle:nth-child(3) { left: 25%; animation-delay: 6s; animation-duration: 28s; }
-        .particle:nth-child(4) { left: 35%; animation-delay: 1s; animation-duration: 20s; }
-        .particle:nth-child(5) { left: 45%; animation-delay: 8s; animation-duration: 26s; }
-        .particle:nth-child(6) { left: 55%; animation-delay: 4s; animation-duration: 24s; }
-        .particle:nth-child(7) { left: 65%; animation-delay: 2s; animation-duration: 21s; }
-        .particle:nth-child(8) { left: 75%; animation-delay: 7s; animation-duration: 27s; }
-        .particle:nth-child(9) { left: 85%; animation-delay: 5s; animation-duration: 23s; }
-        .particle:nth-child(10) { left: 95%; animation-delay: 9s; animation-duration: 25s; }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 24px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Floating Navigation */
-        nav {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 32px;
-            background: rgba(10, 10, 15, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 100px;
-            animation: floatNav 6s infinite ease-in-out;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        
-        @keyframes floatNav {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-10px); }
-        }
-        
-        .logo { font-size: 1.3em; font-weight: 700; background: var(--gradient-hero); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .nav-links { display: flex; gap: 24px; margin: 0 24px; }
-        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9em; transition: all 0.3s; position: relative; }
-        .nav-links a:hover { color: var(--text-primary); }
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--gradient-hero);
-            transition: width 0.3s;
-        }
-        .nav-links a:hover::after { width: 100%; }
-        
-        .nav-cta {
-            padding: 10px 24px;
-            background: var(--gradient-hero);
-            border-radius: 100px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9em;
-            transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-        }
-        .nav-cta:hover { transform: scale(1.05); box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6); }
-        
-        /* Hero */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 120px 0 80px;
-        }
-        
-        .hero h1 {
-            font-size: clamp(2.5em, 8vw, 5em);
-            font-weight: 800;
-            margin-bottom: 24px;
-            background: var(--gradient-hero);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 5s infinite;
-            background-size: 200% 200%;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .hero p {
-            font-size: 1.25em;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-            animation: fadeInUp 1s ease-out 0.3s both;
-        }
-        
-        .hero-badges {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: fadeInUp 1s ease-out 0.5s both;
-        }
-        
-        .badge {
-            padding: 10px 24px;
-            border-radius: 100px;
-            font-size: 0.9em;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-        .badge-arp { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #3b82f6; }
-        .badge-ethos { background: rgba(236, 72, 153, 0.2); border: 1px solid rgba(236, 72, 153, 0.5); color: #ec4899; }
-        .badge-unified { background: rgba(6, 182, 212, 0.2); border: 1px solid rgba(6, 182, 212, 0.5); color: #06b6d4; }
-        
-        .hero-stats {
-            display: flex;
-            gap: 60px;
-            margin-top: 80px;
-            animation: fadeInUp 1s ease-out 0.7s both;
-        }
-        
-        .hero-stat {
-            text-align: center;
-            padding: 30px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            min-width: 180px;
-            transition: all 0.3s;
-        }
-        .hero-stat:hover {
-            transform: translateY(-10px);
-            border-color: var(--accent-purple);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
-        }
-        
-        .hero-stat-value { font-size: 2.5em; font-weight: 800; background: var(--gradient-hero); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-stat-label { color: var(--text-secondary); font-size: 0.9em; margin-top: 8px; }
-        
-        /* Fraud Stats */
-        .fraud-stats {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.15));
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 24px;
-            padding: 48px;
-            text-align: center;
-            margin: 40px 0;
-            animation: floatCard 8s infinite ease-in-out;
-        }
-        
-        @keyframes floatCard {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-        
-        .fraud-stats-value { font-size: 3em; font-weight: 800; color: var(--accent-red); }
-        .fraud-stats-label { color: var(--text-secondary); margin-top: 8px; }
-        
-        /* Score Hero */
-        .score-hero {
-            background: rgba(26, 26, 36, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            padding: 48px;
-            margin: 40px 0;
-            text-align: center;
-            animation: floatCard 6s infinite ease-in-out;
-        }
-        
-        .score-circle {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: var(--gradient-hero);
-            margin: 0 auto 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 60px rgba(139, 92, 246, 0.4);
-            animation: pulseGlow 3s infinite;
-        }
-        
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 60px rgba(139, 92, 246, 0.4); }
-            50% { box-shadow: 0 0 80px rgba(139, 92, 246, 0.6); }
-        }
-        
-        .score-circle-value { font-size: 4em; font-weight: 800; color: white; }
-        .score-circle-label { font-size: 1em; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 2px; }
-        
-        .tier-badge {
-            display: inline-block;
-            padding: 12px 32px;
-            border-radius: 100px;
-            font-size: 1.1em;
-            font-weight: 700;
-            animation: floatBadge 4s infinite ease-in-out;
-        }
-        
-        @keyframes floatBadge {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .tier-legendary { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
-        .tier-established { background: linear-gradient(135deg, #3b82f6, #06b6d4); color: #fff; box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
-        .tier-scammer { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
-        
-        .score-breakdown {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 48px;
-        }
-        
-        .score-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 32px;
-            transition: all 0.3s;
-        }
-        .score-item:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .score-item-label { color: var(--text-secondary); font-size: 0.9em; margin-bottom: 12px; }
-        .score-item-value { font-size: 2.5em; font-weight: 700; }
-        .score-item-arp { background: linear-gradient(135deg, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .score-item-ethos { background: linear-gradient(135deg, #ec4899, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .score-item-unified { background: linear-gradient(135deg, #8b5cf6, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* Agent Cards */
-        .agents-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-        
-        .agent-card {
-            background: rgba(26, 26, 36, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 32px;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .agent-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            border-color: var(--accent-purple);
-            box-shadow: 0 30px 60px rgba(139, 92, 246, 0.3);
-        }
-        
-        .agent-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-        
-        .agent-profile { display: flex; gap: 16px; align-items: center; }
-        
-        .agent-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8em;
-            font-weight: 700;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-        
-        .agent-name { font-size: 1.3em; font-weight: 600; margin-bottom: 4px; }
-        .agent-address { font-size: 0.8em; color: var(--text-muted); font-family: 'Monaco', monospace; }
-        
-        .risk-meter {
-            margin-top: 20px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-        }
-        
-        .risk-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85em; }
-        .risk-bar {
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .risk-fill { height: 100%; border-radius: 5px; transition: width 1s ease-out; }
-        .risk-low { background: linear-gradient(90deg, #10b981, #34d399); width: 5%; }
-        .risk-high { background: linear-gradient(90deg, #ef4444, #dc2626); width: 90%; }
-        
-        /* Leaderboard */
-        .leaderboard-section { padding: 80px 0; }
-        
-        .leaderboard-title { font-size: 2em; font-weight: 700; margin-bottom: 8px; }
-        .leaderboard-subtitle { color: var(--text-secondary); margin-bottom: 32px; }
-        
-        .leaderboard-table { width: 100%; border-collapse: separate; border-spacing: 0 12px; }
-        
-        .leaderboard-row {
-            background: rgba(26, 26, 36, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            transition: all 0.3s;
-        }
-        .leaderboard-row:hover {
-            transform: translateX(8px);
-            border-color: var(--accent-purple);
-        }
-        .leaderboard-row.scammer {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-        }
-        
-        .leaderboard-row td { padding: 20px 24px; }
-        .leaderboard-row td:first-child { border-radius: 16px 0 0 16px; }
-        .leaderboard-row td:last-child { border-radius: 0 16px 16px 0; }
-        
-        .rank { font-size: 1.2em; font-weight: 700; }
-        .rank-1 { color: #ffd700; }
-        .rank-2 { color: #c0c0c0; }
-        .rank-3 { color: #cd7f32; }
-        .rank-scammer { color: var(--accent-red); }
-        
-        .agent-cell { display: flex; align-items: center; gap: 16px; }
-        
-        .agent-cell-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .unified-score {
-            font-size: 1.5em;
-            font-weight: 800;
-            background: var(--gradient-hero);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Features */
-        .features-section { padding: 80px 0; }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin-top: 48px;
-        }
-        
-        .feature-card {
-            background: rgba(26, 26, 36, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px 32px;
-            text-align: center;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            border-color: var(--accent-purple);
-            box-shadow: 0 30px 60px rgba(139, 92, 246, 0.3);
-        }
-        
-        .feature-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 2em;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-        }
-        
-        .feature-title { font-size: 1.3em; font-weight: 600; margin-bottom: 12px; }
-        .feature-desc { color: var(--text-secondary); font-size: 0.95em; }
-        
-        /* Hackathon CTA */
-        .hackathon-cta {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
-            border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 32px;
-            padding: 64px;
-            text-align: center;
-            margin: 80px 0;
-            animation: floatCard 8s infinite ease-in-out;
-        }
-        
-        .hackathon-cta h2 { font-size: 2.5em; margin-bottom: 16px; }
-        .hackathon-cta p { color: var(--text-secondary); max-width: 600px; margin: 0 auto 32px; }
-        
-        /* Footer */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 48px 0;
-            text-align: center;
-            color: var(--text-secondary);
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @media (max-width: 1024px) {
-            .score-breakdown { grid-template-columns: 1fr; }
-            .hero-stats { flex-wrap: wrap; gap: 20px; }
-        }
-        
-        @media (max-width: 768px) {
-            nav { padding: 12px 20px; width: calc(100% - 40px); }
-            .nav-links { display: none; }
-            .hero-stat { min-width: 140px; padding: 20px; }
-            .agents-grid { grid-template-columns: 1fr; }
-        }
+        :root { --bg:#0a0a0f; --card:rgba(26,26,36,0.8); --border:rgba(255,255,255,0.1); --text:#fff; --text2:rgba(255,255,255,0.7); --text3:rgba(255,255,255,0.5); --blue:#3b82f6; --pink:#ec4899; --purple:#8b5cf6; --green:#10b981; --red:#ef4444; --orange:#f59e0b; --grad:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 50%,#ec4899 100%); }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+        .particles{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+        .particle{position:absolute;width:10px;height:10px;background:var(--grad);border-radius:50%;opacity:0.3;animation:float 20s infinite}
+        @keyframes float{0%,100%{transform:translateY(100vh);opacity:0}10%,90%{opacity:0.3}}
+        .particle:nth-child(1){left:5%;animation-delay:0s}.particle:nth-child(2){left:15%;animation-delay:3s}.particle:nth-child(3){left:25%;animation-delay:6s}.particle:nth-child(4){left:35%;animation-delay:1s}.particle:nth-child(5){left:45%;animation-delay:8s}.particle:nth-child(6){left:55%;animation-delay:4s}.particle:nth-child(7){left:65%;animation-delay:2s}.particle:nth-child(8){left:75%;animation-delay:7s}.particle:nth-child(9){left:85%;animation-delay:5s}.particle:nth-child(10){left:95%;animation-delay:9s}
+        .container{max-width:1400px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+        nav{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100;display:flex;gap:24px;align-items:center;padding:16px 32px;background:rgba(10,10,15,0.8);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:100px;animation:floatNav 6s infinite}
+        @keyframes floatNav{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+        .logo{font-size:1.3em;font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav-links{display:flex;gap:24px}.nav-links a{color:var(--text2);text-decoration:none;font-size:0.9em}
+        .nav-cta{padding:10px 24px;background:var(--grad);border-radius:100px;color:white;text-decoration:none;font-weight:600;font-size:0.9em}
+        .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 0 80px}
+        .hero h1{font-size:clamp(2.5em,8vw,5em);font-weight:800;margin-bottom:24px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradShift 5s infinite;background-size:200%}
+        @keyframes gradShift{0%,100%{background-position:0}50%{background-position:100%}}
+        .hero p{font-size:1.25em;color:var(--text2);max-width:600px;margin:0 auto 40px}
+        .badges{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+        .badge{padding:10px 24px;border-radius:100px;font-size:0.9em;font-weight:600;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.5);color:#3b82f6}
+        .badge:nth-child(2){background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.5);color:#10b981}
+        .badge:nth-child(3){background:rgba(236,72,153,0.2);border-color:rgba(236,72,153,0.5);color:#ec4899}
+        .stats{display:flex;gap:60px;margin-top:80px;flex-wrap:wrap;justify-content:center}
+        .stat{text-align:center;padding:30px;background:var(--card);border:1px solid var(--border);border-radius:24px;min-width:180px}
+        .stat:hover{transform:translateY(-10px);border-color:var(--purple)}
+        .stat-v{font-size:2.5em;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-l{color:var(--text2);font-size:0.9em;margin-top:8px}
+        .fraud{background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(245,158,11,0.15));border:1px solid rgba(239,68,68,0.3);border-radius:24px;padding:48px;text-align:center;margin:40px 0;animation:float 8s infinite}
+        .fraud-v{font-size:3em;font-weight:800;color:var(--red)}
+        .fraud-l{color:var(--text2);margin-top:8px}
+        .score-hero{background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:32px;padding:48px;margin:40px 0;text-align:center;animation:float 6s infinite}
+        .circle{width:220px;height:220px;border-radius:50%;background:var(--grad);margin:0 auto 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 60px rgba(139,92,246,0.4);animation:pulse 3s infinite}
+        @keyframes pulse{0%,100%{box-shadow:0 0 60px rgba(139,92,246,0.4)}50%{box-shadow:0 0 80px rgba(139,92,246,0.6)}}
+        .circle-v{font-size:4em;font-weight:800;color:white}
+        .circle-l{font-size:1em;color:rgba(255,255,255,0.8);text-transform:uppercase;letter-spacing:2px}
+        .tier-badge{display:inline-block;padding:12px 32px;border-radius:100px;font-size:1.1em;font-weight:700;animation:float 4s infinite}
+        .tier-legendary{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#000;box-shadow:0 0 30px rgba(255,215,0,0.5)}
+        .tier-established{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;box-shadow:0 0 30px rgba(59,130,246,0.4)}
+        .tier-trusted{background:linear-gradient(135deg,#10b981,#34d399);color:#000;box-shadow:0 0 30px rgba(16,185,129,0.4)}
+        .tier-newcomer{background:var(--bg);color:var(--text2);box-shadow:0 0 30px rgba(255,255,255,0.1)}
+        .tier-scammer{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 0 30px rgba(239,68,68,0.4)}
+        .breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+        .item{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:20px;padding:32px}
+        .item:hover{transform:translateY(-8px);background:rgba(255,255,255,0.05)}
+        .item-l{color:var(--text2);font-size:0.9em;margin-bottom:12px}
+        .item-v{font-size:2.5em;font-weight:700}
+        .item-arp{background:linear-gradient(135deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .item-ethos{background:linear-gradient(135deg,#ec4899,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .item-unified{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:24px;margin-top:40px}
+        .card{background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:24px;padding:32px;transition:all 0.5s}
+        .card:hover{transform:translateY(-15px) scale(1.02);border-color:var(--purple);box-shadow:0 30px 60px rgba(139,92,246,0.3)}
+        .card.human{border-color:rgba(16,185,129,0.3)}
+        .card.human::before{content:"👤";position:absolute;top:-10px;right:20px;background:#10b981;padding:8px 16px;border-radius:20px;font-size:0.9em}
+        .card.flagged{border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.1)}
+        .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+        .profile{display:flex;gap:16px;align-items:center}
+        .avatar{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;font-weight:700}
+        .name{font-size:1.3em;font-weight:600;margin-bottom:4px}
+        .addr{font-size:0.8em;color:var(--text3);font-family:Monospace}
+        .atype{font-size:0.75em;padding:4px 12px;border-radius:20px;margin-top:4px;display:inline-block;background:rgba(139,92,246,0.2);color:#a78bfa}
+        .atype.human{background:rgba(16,185,129,0.2);color:#34d399}
+        .risk{margin-top:20px;padding:16px;background:rgba(0,0,0,0.3);border-radius:12px}
+        .risk-l{display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.85em}
+        .risk-b{height:10px;background:rgba(255,255,255,0.1);border-radius:5px;overflow:hidden}
+        .risk-f{height:100%;border-radius:5px;transition:width 1s}
+        .risk-low{background:linear-gradient(90deg,#10b981,#34d399)}
+        .risk-medium{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+        .risk-high{background:linear-gradient(90deg,#ef4444,#dc2626)}
+        .add{background:var(--card);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:32px;padding:48px;margin:60px 0}
+        .add h2{font-size:1.8em;font-weight:700;margin-bottom:32px;text-align:center;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .form{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:32px}
+        .full{grid-column:span 2}
+        .group{display:flex;flex-direction:column;gap:8px}
+        label{font-size:0.9em;color:var(--text2);font-weight:500}
+        input,select{padding:16px 20px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:1em}
+        input:focus,select:focus{outline:none;border-color:var(--purple);box-shadow:0 0 20px rgba(139,92,246,0.2)}
+        select{cursor:pointer}
+        button{width:100%;padding:20px 40px;background:var(--grad);border:none;border-radius:16px;color:white;font-size:1.1em;font-weight:600;cursor:pointer;transition:all 0.3s}
+        button:hover{transform:translateY(-4px)}
+        .leaderboard{padding:80px 0}
+        .leaderboard h2{font-size:2em;font-weight:700;margin-bottom:8px}
+        .leaderboard p{color:var(--text2);margin-bottom:32px}
+        table{width:100%;border-collapse:separate;border-spacing:0 12px}
+        tr{background:var(--card);border:1px solid var(--border);border-radius:16px;transition:all 0.3s}
+        tr:hover{transform:translateX(8px);border-color:var(--purple)}
+        tr.scammer{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3)}
+        tr.human{border-color:rgba(16,185,129,0.3)}
+        td{padding:20px 24px}
+        td:first-child{border-radius:16px 0 0 16px}
+        td:last-child{border-radius:0 16px 16px 0}
+        .rank{font-size:1.2em;font-weight:700}
+        .rank-1{color:#ffd700}
+        .rank-2{color:#c0c0c0}
+        .rank-3{color:#cd7f32}
+        .cell{display:flex;align-items:center;gap:16px}
+        .cell-avatar{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:600}
+        .score{font-size:1.5em;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        footer{text-align:center;padding:48px 0;color:var(--text2);border-top:1px solid var(--border);margin-top:80px}
+        .notif{position:fixed;bottom:30px;right:30px;padding:20px 32px;background:linear-gradient(135deg,#10b981,#34d399);border-radius:16px;color:white;font-weight:600;z-index:1000;transform:translateX(400px);transition:transform 0.5s}
+        .notif.show{transform:translateX(0)}
+        @media(max-width:1024px){.breakdown{grid-template-columns:1fr}}
+        @media(max-width:768px){nav{padding:12px 20px;width:calc(100%-40px)}.form{grid-template-columns:1fr}.full{grid-column:span 1}}
     </style>
 </head>
 <body>
-    <!-- Floating Particles -->
     <div class="particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div><div class="particle"></div>
     </div>
-    
-    <!-- Floating Navigation -->
     <nav>
         <div class="logo">ARP × Ethos</div>
         <div class="nav-links">
             <a href="#demo">Demo</a>
+            <a href="#add-agent">Add Agent</a>
             <a href="#leaderboard">Leaderboard</a>
-            <a href="#features">Features</a>
         </div>
         <a href="https://github.com/iamgaurangdesai/Agent-Reputation-Protocol-" class="nav-cta">GitHub →</a>
     </nav>
-    
-    <!-- Hero -->
     <section class="hero" id="demo">
-        <div class="container">
-            <h1>Unified Trust<br>for AI Agents</h1>
-            <p>First on-chain reputation system combining ARP agent ratings with Ethos credibility scores. Trust, but verify. On-chain.</p>
-            
-            <div class="hero-badges">
-                <span class="badge badge-arp">🤖 ARP v2.0</span>
-                <span class="badge badge-ethos">🌐 Ethos Network</span>
-                <span class="badge badge-unified">🎯 Unified Score</span>
-            </div>
-            
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <div class="hero-stat-value">$9B+</div>
-                    <div class="hero-stat-label">Lost to Crypto Fraud</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">2 Systems</div>
-                    <div class="hero-stat-label">One Unified Score</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="hero-stat-value">100%</div>
-                    <div class="hero-stat-label">On-Chain Verified</div>
-                </div>
-            </div>
+        <h1>Unified Trust<br>for AI Agents</h1>
+        <p>First on-chain reputation system combining ARP agent ratings with Ethos credibility scores.</p>
+        <div class="badges">
+            <span class="badge">🤖 AI Agents</span>
+            <span class="badge">👤 Human Agents</span>
+            <span class="badge">🌐 Ethos Network</span>
+        </div>
+        <div class="stats">
+            <div class="stat"><div class="stat-v">$9B+</div><div class="stat-l">Lost to Crypto Fraud</div></div>
+            <div class="stat"><div class="stat-v">2 Systems</div><div class="stat-l">One Unified Score</div></div>
+            <div class="stat"><div class="stat-v">100%</div><div class="stat-l">On-Chain Verified</div></div>
         </div>
     </section>
-    
-    <!-- Fraud Stats -->
     <div class="container">
-        <div class="fraud-stats">
-            <div class="fraud-stats-value">$9,000,374,891</div>
-            <div class="fraud-stats-label">Lost in the past year due to crypto fraud • Over $1M lost daily</div>
-        </div>
-    </div>
-    
-    <!-- Score Hero -->
-    <div class="container">
+        <div class="fraud"><div class="fraud-v">$9,000,374,891</div><div class="fraud-l">Lost in the past year due to crypto fraud • Over $1M lost daily</div></div>
         <div class="score-hero">
-            <h2 style="margin-bottom: 8px;">🎯 Your Unified Trust Score</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 32px;">ARP Reputation + Ethos Credibility combined</p>
-            
-            <div class="score-circle">
-                <div class="score-circle-value">114.7</div>
-                <div class="score-circle-label">Unified</div>
-            </div>
-            
+            <h2 style="margin-bottom:8px">🎯 Your Unified Trust Score</h2>
+            <p style="color:var(--text2);margin-bottom:32px">ARP Reputation + Ethos Credibility combined</p>
+            <div class="circle"><div class="circle-v">114.7</div><div class="circle-l">Unified</div></div>
             <div class="tier-badge tier-legendary">👑 LEGENDARY</div>
-            
-            <div class="score-breakdown">
-                <div class="score-item">
-                    <div class="score-item-label">🤖 ARP Reputation</div>
-                    <div class="score-item-value score-item-arp">190.0</div>
-                    <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 8px;">10 transactions • 50 total tx</div>
-                </div>
-                <div class="score-item">
-                    <div class="score-item-label">🌐 Ethos Credibility</div>
-                    <div class="score-item-value score-item-ethos">144.4</div>
-                    <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 8px;">88 positive • 2 negative reviews</div>
-                </div>
-                <div class="score-item">
-                    <div class="score-item-label">🎯 Combined Score</div>
-                    <div class="score-item-value score-item-unified">114.7</div>
-                    <div style="font-size: 0.85em; color: var(--text-muted); margin-top: 8px;">50% ARP × 50% Ethos</div>
-                </div>
+            <div class="breakdown">
+                <div class="item"><div class="item-l">🤖 ARP Reputation</div><div class="item-v item-arp">190.0</div><div style="font-size:0.85em;color:var(--text3);margin-top:8px">From agent transactions</div></div>
+                <div class="item"><div class="item-l">🌐 Ethos Credibility</div><div class="item-v item-ethos">144.4</div><div style="font-size:0.85em;color:var(--text3);margin-top:8px">Human credibility score</div></div>
+                <div class="item"><div class="item-l">🎯 Combined Score</div><div class="item-v item-unified">114.7</div><div style="font-size:0.85em;color:var(--text3);margin-top:8px">50% ARP × 50% Ethos</div></div>
             </div>
         </div>
+        <h2 style="font-size:2em;margin:60px 0 32px">👥 Agents</h2>
+        <div class="agents" id="agents-grid"></div>
+        <section class="add" id="add-agent">
+            <h2>🚀 Add Your Agent</h2>
+            <form class="form" id="agentForm">
+                <div class="group"><label>Agent Name</label><input type="text" id="name" placeholder="e.g., Genie-AI" required></div>
+                <div class="group"><label>Agent Type</label><select id="agentType"><option value="ai">🤖 AI Agent</option><option value="human">👤 Human Agent</option></select></div>
+                <div class="group"><label>Wallet Address</label><input type="text" id="address" placeholder="0x..." required></div>
+                <div class="group"><label>Stake (USDC)</label><input type="number" id="stake" placeholder="100" value="100"></div>
+                <div class="group"><label>Wallet Age (years)</label><input type="number" id="walletAge" placeholder="1" value="1" step="0.1"></div>
+                <div class="group"><label>Vouches</label><input type="number" id="vouches" placeholder="0" value="0"></div>
+                <div class="group"><label>Positive Reviews</label><input type="number" id="positive" placeholder="0" value="0"></div>
+                <div class="group"><label>Negative Reviews</label><input type="number" id="negative" placeholder="0" value="0"></div>
+                <div class="group"><label>Transactions</label><input type="number" id="transactions" placeholder="0" value="0"></div>
+                <div class="group"><label>Slashes</label><input type="number" id="slashes" placeholder="0" value="0"></div>
+            </form>
+            <button onclick="document.getElementById('agentForm').dispatchEvent(new Event('submit'))">Add Agent</button>
+        </section>
+        <section class="leaderboard" id="leaderboard">
+            <h2>🏆 Reputation Leaderboard</h2>
+            <p>Real-time on-chain scores</p>
+            <table><thead><tr><th>Rank</th><th>Agent</th><th>ARP</th><th>Ethos</th><th>Unified</th><th>Tier</th><th>Status</th></tr></thead><tbody id="leaderboard-body"></tbody></table>
+        </section>
     </div>
-    
-    <!-- Agent Cards -->
-    <div class="container">
-        <h2 style="font-size: 2em; margin: 60px 0 32px;">👥 Agents</h2>
-        <div class="agents-grid">
-            <!-- Gaurang -->
-            <div class="agent-card">
-                <div class="agent-header">
-                    <div class="agent-profile">
-                        <div class="agent-avatar" style="background: linear-gradient(135deg, #ffd700, #ffaa00);">👑</div>
-                        <div>
-                            <div class="agent-name">Gaurang-Desai</div>
-                            <div class="agent-address">0xGAUR...HACK</div>
-                        </div>
-                    </div>
-                    <div class="tier-badge tier-legendary">👑 LEGENDARY</div>
-                </div>
-                
-                <div style="text-align: center; margin: 20px 0;">
-                    <div style="font-size: 3em; font-weight: 800; background: var(--gradient-hero); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">114.7</div>
-                    <div style="color: var(--text-muted);">Unified Score</div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px;">
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">💰 Stake</div>
-                        <div style="color: var(--accent-green); font-weight: 600;">500 USDC</div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">📅 Wallet</div>
-                        <div style="color: var(--accent-green); font-weight: 600;">3.5 years</div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">👍 Vouches</div>
-                        <div style="font-weight: 600;">35</div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">⭐ Reviews</div>
-                        <div style="color: var(--accent-green); font-weight: 600;">+88/-2</div>
-                    </div>
-                </div>
-                
-                <div class="risk-meter">
-                    <div class="risk-label">
-                        <span>🚨 Sybil Risk</span>
-                        <span style="color: var(--accent-green);">2%</span>
-                    </div>
-                    <div class="risk-bar">
-                        <div class="risk-fill risk-low"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Scammer -->
-            <div class="agent-card" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3);">
-                <div class="agent-header">
-                    <div class="agent-profile">
-                        <div class="agent-avatar" style="background: linear-gradient(135deg, #ef4444, #dc2626);">🚫</div>
-                        <div>
-                            <div class="agent-name">ScamBot-Eve</div>
-                            <div class="agent-address">0xSCAM...EVE</div>
-                        </div>
-                    </div>
-                    <div class="tier-badge tier-scammer">⚠️ FLAGGED</div>
-                </div>
-                
-                <div style="text-align: center; margin: 20px 0;">
-                    <div style="font-size: 3em; font-weight: 800; color: var(--accent-red);">5.6</div>
-                    <div style="color: var(--text-muted);">Unified Score</div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px;">
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">💰 Stake</div>
-                        <div style="color: var(--accent-red); font-weight: 600;">5 USDC</div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">📅 Wallet</div>
-                        <div style="color: var(--accent-red); font-weight: 600;">0.05 years</div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">👍 Vouches</div>
-                        <div style="color: var(--accent-red); font-weight: 600;">0</div>
-                    </div>
-                    <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px;">
-                        <div style="color: var(--text-muted); font-size: 0.8em;">⚔️ Slashes</div>
-                        <div style="color: var(--accent-red); font-weight: 600;">5</div>
-                    </div>
-                </div>
-                
-                <div class="risk-meter">
-                    <div class="risk-label">
-                        <span>🚨 Sybil Risk</span>
-                        <span style="color: var(--accent-red);">90%</span>
-                    </div>
-                    <div class="risk-bar">
-                        <div class="risk-fill risk-high"></div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 16px; padding: 16px; background: rgba(239, 68, 68, 0.2); border-radius: 12px; text-align: center;">
-                    <strong style="color: var(--accent-red);">🚫 BLACKLISTED</strong>
-                    <div style="font-size: 0.9em; color: var(--text-secondary); margin-top: 4px;">In both ARP + Ethos</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Leaderboard -->
-    <section class="leaderboard-section" id="leaderboard">
-        <div class="container">
-            <div class="leaderboard-title">🏆 Reputation Leaderboard</div>
-            <div class="leaderboard-subtitle">Real-time on-chain scores</div>
-            
-            <table class="leaderboard-table">
-                <tbody>
-                    <tr class="leaderboard-row">
-                        <td><span class="rank rank-1">🥇 1</span></td>
-                        <td>
-                            <div class="agent-cell
+    <footer>
+        <p>🚀 USDC Agentic Hackathon 2026 | ARP x Ethos Integration</p>
+        <p style="margin-top:8px">https://github.com/iamgaurangdesai/Agent-Reputation-Protocol-</p>
+    </footer>
+    <div class="notif" id="notification"></div>
+</body>
+</html>
