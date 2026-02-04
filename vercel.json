@@ -1,7 +1,0 @@
-{
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "framework": null,
-  "devCommand": "python3 -m http.server $PORT",
-  "installCommand": "echo skip"
-}
