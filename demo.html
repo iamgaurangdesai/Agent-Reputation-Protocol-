@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARP Console | Agent Reputation Protocol</title>
-    <script src="https://unpkg.com/@privy-io/react-auth@1.63.0/dist/global.js"></script>
+    <!-- Privy React SDK -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@privy-io/react-auth@1.63.0/dist/index.umd.js"></script>
+    <!-- Ethers.js -->
     <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -46,20 +50,11 @@
         .logo { display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-weight: 700; font-size: 16px; }
         .logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
 
-        #privy-login-button {
-            padding: 10px 20px;
-            background: var(--primary);
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-family: var(--font-mono);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
+        /* Privy override styles */
+        #privy-container {
+            position: relative;
         }
-
-        #privy-login-button:hover { background: var(--primary-dim); transform: translateY(-1px); }
-
+        
         .wallet-info {
             display: flex;
             align-items: center;
@@ -88,10 +83,11 @@
             gap: 8px;
             margin-bottom: 24px;
             border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
         }
 
         .tab {
-            padding: 12px 24px;
+            padding: 12px 20px;
             background: transparent;
             border: none;
             border-bottom: 2px solid transparent;
@@ -100,6 +96,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 14px;
         }
 
         .tab:hover { color: var(--text); }
@@ -121,6 +118,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .card-title {
@@ -143,7 +142,7 @@
             letter-spacing: 0.05em;
         }
 
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
             padding: 12px 16px;
             background: var(--bg);
@@ -155,7 +154,7 @@
             transition: all 0.2s;
         }
 
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.1);
@@ -185,6 +184,9 @@
 
         .btn:hover { background: var(--primary-dim); transform: translateY(-1px); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-success { background: var(--success); }
 
         .status {
             padding: 16px;
@@ -318,11 +320,35 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
+        .empty-state h2 { margin-bottom: 12px; }
+        .empty-state p { color: var(--text-muted); margin-bottom: 24px; }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 50px 1fr auto;
+            gap: 16px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .leaderboard-item:hover { background: rgba(47, 129, 247, 0.05); }
+        .leaderboard-item:last-child { border-bottom: none; }
+
+        .rank { font-family: var(--font-mono); font-weight: 800; color: var(--primary); font-size: 20px; }
+        .rank-top { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
         @media (max-width: 768px) {
             .form-row { grid-template-columns: 1fr; }
             .agent-profile { grid-template-columns: 1fr; text-align: center; }
             .agent-avatar { margin: 0 auto; }
             .score-grid { grid-template-columns: 1fr; }
+            .tabs { overflow-x: auto; }
+            .leaderboard-item { grid-template-columns: 40px 1fr; }
         }
     </style>
 </head>
@@ -334,7 +360,7 @@
                 <span>ARP Console</span>
             </div>
             <div id="walletSection">
-                <button id="privy-login-button" onclick="initPrivy()">🔗 Login with Privy</button>
+                <button id="connectBtn" class="btn">🔗 Connect Wallet</button>
             </div>
         </header>
 
@@ -377,11 +403,11 @@
                         </div>
                     </div>
                 </div>
-                <div id="noProfile" class="card" style="text-align: center; padding: 60px 20px;">
-                    <div style="font-size: 64px; margin-bottom: 20px;">🔍</div>
-                    <h2 style="margin-bottom: 12px;">No Agent Profile Found</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 24px;">Login and register to see your reputation profile.</p>
-                    <button class="btn" onclick="initPrivy()">Login with Privy</button>
+                <div id="noProfile" class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <h2>No Agent Profile Found</h2>
+                    <p>Connect your wallet and register to see your reputation profile.</p>
+                    <button class="btn" onclick="connectWallet()">Connect Wallet</button>
                 </div>
             </div>
 
@@ -403,11 +429,11 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Your Wallet</label>
-                                <input type="text" id="regWallet" class="form-input" placeholder="Login first" readonly>
+                                <input type="text" id="regWallet" class="form-input" placeholder="Connect wallet first" readonly>
                             </div>
                         </div>
                         <button class="btn" id="registerBtn" onclick="registerAgent()" disabled>
-                            <span id="registerBtnText">Login to Register</span>
+                            <span id="registerBtnText">Connect Wallet to Register</span>
                         </button>
                     </div>
                 </div>
@@ -431,7 +457,7 @@
                             </div>
                         </div>
                         <button class="btn" id="txBtn" onclick="recordTransaction()" disabled>
-                            <span id="txBtnText">Login First</span>
+                            <span id="txBtnText">Connect Wallet First</span>
                         </button>
                     </div>
                 </div>
@@ -439,9 +465,11 @@
                     <div class="card-header">
                         <div class="card-title">📜 Transaction History</div>
                     </div>
-                    <div class="tx-list" id="txList">
-                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
-                            Login to view transactions
+                    <div id="txList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h2>No Transactions Yet</h2>
+                            <p>Your transaction history will appear here.</p>
                         </div>
                     </div>
                 </div>
@@ -452,6 +480,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-title">🏆 Top Agents</div>
+                        <span class="tier-badge tier-legendary">Live Data</span>
                     </div>
                     <div id="leaderboardList">
                         <div style="text-align: center; padding: 60px 20px;">
@@ -489,23 +518,40 @@
                 ],
                 "stateMutability": "view",
                 "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getLeaderboard",
+                "outputs": [
+                    {"internalType": "address[]","name": "","type": "address[]"},
+                    {"internalType": "uint256[]","name": "","type": "uint256[]"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
             }
         ];
 
-        let privyClient = null;
         let provider = null;
         let signer = null;
         let contract = null;
         let userAddress = null;
 
-        // Initialize Privy
-        async function initPrivy() {
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLeaderboard();
+            
+            // Check if wallet was previously connected
+            if (window.ethereum && window.ethereum.selectedAddress) {
+                connectWallet();
+            }
+        });
+
+        // Connect Wallet
+        async function connectWallet() {
             try {
-                // For demo, we'll use a simple MetaMask fallback since Privy requires app ID
-                // In production, you'd use: const privy = new PrivyClient({ appId: 'your-app-id' });
-                
                 if (typeof window.ethereum === 'undefined') {
                     showStatus('Please install MetaMask or use a Web3 wallet!', 'error');
+                    // Open Privy login modal would go here
                     return;
                 }
 
@@ -522,7 +568,7 @@
                     <div class="wallet-info">
                         <span class="wallet-address">${userAddress.slice(0, 6)}...${userAddress.slice(-4)}</span>
                         <span class="network-badge">Base Sepolia</span>
-                        <button onclick="logout()" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 12px;">✕</button>
+                        <button onclick="disconnectWallet()" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 12px;">✕</button>
                     </div>
                 `;
 
@@ -535,21 +581,40 @@
 
                 // Load data
                 await loadAgentProfile();
-                await loadLeaderboard();
 
                 showStatus('Wallet connected!', 'success');
             } catch (error) {
                 console.error(error);
-                showStatus('Connection failed: ' + error.message, 'error');
+                showStatus('Connection failed: ' + (error.message || 'User rejected'), 'error');
             }
         }
 
-        function logout() {
-            location.reload();
+        function disconnectWallet() {
+            userAddress = null;
+            provider = null;
+            signer = null;
+            contract = null;
+            
+            document.getElementById('walletSection').innerHTML = `
+                <button id="connectBtn" class="btn" onclick="connectWallet()">🔗 Connect Wallet</button>
+            `;
+            
+            document.getElementById('profileCard').style.display = 'none';
+            document.getElementById('noProfile').style.display = 'block';
+            
+            document.getElementById('registerBtn').disabled = true;
+            document.getElementById('registerBtnText').textContent = 'Connect Wallet to Register';
+            document.getElementById('regWallet').value = '';
+            document.getElementById('txBtn').disabled = true;
+            document.getElementById('txBtnText').textContent = 'Connect Wallet First';
+            
+            showStatus('Wallet disconnected', 'info');
         }
 
         // Load Agent Profile
         async function loadAgentProfile() {
+            if (!contract || !userAddress) return;
+            
             try {
                 const agent = await contract.getAgent(userAddress);
                 
@@ -579,6 +644,11 @@
 
         // Register Agent
         async function registerAgent() {
+            if (!contract) {
+                showStatus('Please connect wallet first', 'error');
+                return;
+            }
+            
             try {
                 const name = document.getElementById('regName').value;
                 const stake = document.getElementById('regStake').value;
@@ -588,54 +658,80 @@
                     return;
                 }
 
-                showStatus('Registering... Confirm in wallet', 'info');
+                if (parseFloat(stake) < 0.01) {
+                    showStatus('Minimum stake is 0.01 ETH', 'error');
+                    return;
+                }
+
+                showStatus('Confirm transaction in your wallet...', 'info');
 
                 const tx = await contract.registerAgent(name, ethers.utils.parseEther(stake), {
                     value: ethers.utils.parseEther(stake)
                 });
 
-                showStatus('Waiting for confirmation...', 'info');
+                showStatus('Waiting for blockchain confirmation...', 'info');
                 await tx.wait();
                 
-                showStatus('Registered successfully!', 'success');
+                showStatus('🎉 Agent registered successfully!', 'success');
                 await loadAgentProfile();
                 showTab('profile');
             } catch (error) {
                 console.error(error);
-                showStatus('Registration failed: ' + error.message, 'error');
+                if (error.code === 'ACTION_REJECTED') {
+                    showStatus('Transaction rejected by user', 'error');
+                } else {
+                    showStatus('Registration failed: ' + (error.message || 'Unknown error'), 'error');
+                }
             }
         }
 
-        // Record Transaction
+        // Record Transaction (placeholder)
         async function recordTransaction() {
-            showStatus('Transaction recording coming soon!', 'info');
+            if (!contract) {
+                showStatus('Please connect wallet first', 'error');
+                return;
+            }
+            
+            const to = document.getElementById('txTo').value;
+            const amount = document.getElementById('txAmount').value;
+            
+            if (!to || !amount) {
+                showStatus('Please fill in all fields', 'error');
+                return;
+            }
+            
+            showStatus('Transaction recording feature coming soon!', 'info');
         }
 
         // Load Leaderboard
         async function loadLeaderboard() {
+            // Mock data for now - in production this would fetch from contract
             const agents = [
                 { name: "gaurang-desai", wallet: "0xGAUR...HACK", arpScore: 190, unifiedScore: 114.7, tier: "legendary" },
                 { name: "crypto-king-og", wallet: "0xCRY...KING", arpScore: 200, unifiedScore: 150.0, tier: "legendary" },
-                { name: "trustworthy-alice", wallet: "0xTRU...LICE", arpScore: 112, unifiedScore: 72.2, tier: "established" },
                 { name: "agent-genius", wallet: "0xAGE...NIUS", arpScore: 135, unifiedScore: 88.5, tier: "elite" },
+                { name: "trustworthy-alice", wallet: "0xTRU...LICE", arpScore: 112, unifiedScore: 72.2, tier: "established" },
                 { name: "newcomer-bob", wallet: "0xNEW...BOB", arpScore: 25, unifiedScore: 22.5, tier: "newcomer" }
             ];
 
             const sorted = agents.sort((a, b) => b.unifiedScore - a.unifiedScore);
             
-            document.getElementById('leaderboardList').innerHTML = sorted.map((agent, i) => `
-                <div class="tx-item">
-                    <div style="font-family: var(--font-mono); font-weight: 800; color: var(--primary); font-size: 18px;">#${i + 1}</div>
-                    <div class="tx-details">
-                        <div style="font-weight: 600; font-size: 16px;">${agent.name}</div>
-                        <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">${agent.wallet}</div>
+            document.getElementById('leaderboardList').innerHTML = sorted.map((agent, i) => {
+                const rankClass = i === 0 ? 'rank-top' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+                return `
+                    <div class="leaderboard-item">
+                        <div class="rank ${rankClass}">#${i + 1}</div>
+                        <div class="tx-details">
+                            <div style="font-weight: 600; font-size: 16px;">${agent.name}</div>
+                            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">${agent.wallet}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 18px; color: var(--primary);">${agent.unifiedScore}</div>
+                            <span class="tier-badge tier-${agent.tier}">${agent.tier}</span>
+                        </div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-family: var(--font-mono); font-weight: 700; font-size: 18px; color: var(--primary);">${agent.unifiedScore}</div>
-                        <span class="tier-badge tier-${agent.tier}">${agent.tier}</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Tab switching
@@ -654,6 +750,13 @@
             status.className = 'status status-' + type + ' show';
             setTimeout(() => status.classList.remove('show'), 5000);
         }
+
+        // Privy Integration Placeholder
+        // For full Privy integration, you'll need to:
+        // 1. Set up React app with @privy-io/react-auth
+        // 2. Use the privy-config.tsx component
+        // 3. This demo uses MetaMask directly for simplicity
+        // 4. Full Privy integration available in fullstack/ folder
     </script>
 </body>
 </html>
