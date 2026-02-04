@@ -3,307 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARP // Agent Reputation Protocol</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>ARP Console | Agent Reputation Protocol</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d1117;
-            --bg-subtle: #161b22;
-            --bg-elevated: #21262d;
+            --bg-elevated: #161b22;
             --border: #30363d;
-            --border-light: #484f58;
-            --primary: #39d0d8;
-            --primary-dim: #2db5bc;
-            --primary-glow: rgba(57, 208, 216, 0.25);
-            --accent: #f0883e;
-            --accent-dim: #e06c00;
-            --accent-glow: rgba(240, 136, 62, 0.25);
-            --warning: #f0883e;
-            --danger: #ff6b6b;
-            --text: #f0f6fc;
+            --primary: #2f81f7;
+            --primary-dim: #388bfd;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --text: #c9d1d9;
             --text-muted: #8b949e;
-            --text-dim: #6e7681;
-            --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
-            --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-sans: 'Inter', sans-serif;
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html { font-size: 17px; scroll-behavior: smooth; }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            font-family: var(--font-display);
+            font-family: var(--font-sans);
             background: var(--bg);
             color: var(--text);
-            line-height: 1.65;
+            line-height: 1.6;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Terminal Cursor */
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.2em;
-            background: var(--primary);
-            animation: blink 1s step-end infinite;
-            vertical-align: text-bottom;
-            margin-left: 2px;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
-        /* Grid Background */
-        .grid-bg {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .content {
-            position: relative;
-            z-index: 1;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 24px 80px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
         /* Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 80px;
-            padding-bottom: 24px;
+            padding: 16px 24px;
+            background: var(--bg-elevated);
             border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 16px;
+            margin-bottom: 32px;
         }
 
-        .logo {
+        .logo { display: flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-weight: 700; }
+        .logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+
+        /* Wallet Button */
+        #connectWallet {
+            padding: 10px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 6px;
+            color: white;
             font-family: var(--font-mono);
-            font-size: 14px;
             font-weight: 600;
-            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #connectWallet:hover { background: var(--primary-dim); transform: translateY(-1px); }
+        #connectWallet:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .wallet-info {
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-
-        .logo-mark {
-            width: 32px;
-            height: 32px;
-            background: var(--bg-elevated);
+            padding: 8px 16px;
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-family: var(--font-mono);
-            font-size: 18px;
+            font-size: 13px;
         }
 
-        .network-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--font-mono);
-            font-size: 10px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 44px;
-            height: 22px;
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: 11px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .toggle-switch.active {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 16px;
-            height: 16px;
-            background: var(--text);
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-
-        .toggle-switch.active::after {
-            left: calc(100% - 18px);
-        }
-
-        .network-label {
-            padding: 6px 12px;
+        .wallet-address { color: var(--primary); font-weight: 600; }
+        .network-badge {
+            padding: 4px 8px;
+            background: var(--success);
+            color: var(--bg);
             border-radius: 4px;
-            font-family: var(--font-mono);
             font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Tabs */
+        .tabs {
             display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.2s ease;
-        }
-
-        .network-mainnet {
-            background: var(--primary-glow);
-            border: 1px solid var(--primary-dim);
-            color: var(--primary);
-        }
-
-        .network-sepolia {
-            background: rgba(255, 179, 71, 0.15);
-            border: 1px solid rgba(255, 179, 71, 0.3);
-            color: #ffb347;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Hero */
-        .hero {
-            margin-bottom: 80px;
-        }
-
-        .hero-label {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
             gap: 8px;
-        }
-
-        .hero-label::before {
-            content: '>';
-            color: var(--primary);
-        }
-
-        h1 {
-            font-size: clamp(32px, 6vw, 52px);
-            font-weight: 600;
-            line-height: 1.1;
             margin-bottom: 24px;
-            letter-spacing: -0.02em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
         }
 
-        h1 .highlight {
-            color: var(--primary);
-            position: relative;
-        }
-
-        h1 .highlight::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--primary);
-            opacity: 0.3;
-        }
-
-        .hero-desc {
-            font-size: 18px;
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
             color: var(--text-muted);
-            max-width: 520px;
-            margin-bottom: 40px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Terminal Window */
-        .terminal {
-            background: var(--bg-subtle);
+        .tab:hover { color: var(--text); }
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-elevated);
             border: 1px solid var(--border);
             border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 80px;
-        }
-
-        .terminal-header {
-            background: var(--bg-elevated);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .terminal-btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: none;
-        }
-
-        .terminal-btn.close { background: #ff5f57; }
-        .terminal-btn.minimize { background: #febc2e; }
-        .terminal-btn.maximize { background: #28c840; }
-
-        .terminal-title {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-left: 8px;
-        }
-
-        .terminal-body {
             padding: 24px;
+            margin-bottom: 24px;
         }
 
-        /* Form */
-        .form-group {
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
 
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Forms */
+        .form-group { margin-bottom: 20px; }
+        
         .form-label {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-bottom: 8px;
             display: block;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .form-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 16px;
             background: var(--bg);
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             color: var(--text);
             font-family: var(--font-mono);
-            font-size: 13px;
-            transition: all 0.2s ease;
+            font-size: 14px;
+            transition: all 0.2s;
         }
 
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        .form-input::placeholder {
-            color: var(--text-dim);
+            box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.1);
         }
 
         .form-row {
@@ -312,572 +179,577 @@
             gap: 16px;
         }
 
+        /* Buttons */
         .btn {
-            width: 100%;
-            padding: 14px 24px;
+            padding: 14px 28px;
             background: var(--primary);
             border: none;
-            border-radius: 6px;
-            color: var(--bg);
+            border-radius: 8px;
+            color: white;
             font-family: var(--font-mono);
-            font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
+            transition: all 0.2s;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
         }
 
-        .btn:hover {
-            background: var(--primary-dim);
-            transform: translateY(-1px);
-        }
+        .btn:hover { background: var(--primary-dim); transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
 
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        /* Result */
-        .result {
-            margin-top: 24px;
-            padding: 24px;
-            background: var(--bg);
-            border: 1px solid var(--border);
+        /* Status Messages */
+        .status {
+            padding: 16px;
             border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: var(--font-mono);
+            font-size: 13px;
             display: none;
         }
 
-        .result.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
+        .status.show { display: block; }
+        .status-success { background: rgba(63, 185, 80, 0.1); border: 1px solid var(--success); color: var(--success); }
+        .status-error { background: rgba(248, 81, 73, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+        .status-info { background: rgba(47, 129, 247, 0.1); border: 1px solid var(--primary); color: var(--primary); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-score {
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--primary);
-            font-family: var(--font-mono);
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .result-tier {
-            font-family: var(--font-mono);
-            font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 16px;
-        }
-
-        .tier-legendary { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
-        .tier-elite { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
-        .tier-established { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
-        .tier-trusted { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .tier-newcomer { background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3); }
-
-        .result-meta {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .result-meta span {
-            margin-right: 16px;
-        }
-
-        /* Leaderboard */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .section-title {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--text-dim);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title::before {
-            content: '[';
-            color: var(--primary);
-        }
-
-        .section-title::after {
-            content: ']';
-            color: var(--primary);
-        }
-
-        .leaderboard {
-            background: var(--bg-subtle);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .leaderboard-row {
+        /* Agent Profile */
+        .agent-profile {
             display: grid;
-            grid-template-columns: 60px 1fr 100px 100px 120px;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
+            grid-template-columns: auto 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .agent-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+            border-radius: 50%;
+            display: flex;
             align-items: center;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            transition: background 0.2s ease;
+            justify-content: center;
+            font-size: 48px;
         }
 
-        .leaderboard-row:last-child {
-            border-bottom: none;
-        }
-
-        .leaderboard-row:hover {
-            background: var(--bg-elevated);
-        }
-
-        .leaderboard-header {
-            background: var(--bg-elevated);
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .rank {
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .agent-name {
-            font-weight: 500;
-            color: var(--text);
+        .agent-details h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
         }
 
         .agent-wallet {
-            color: var(--text-dim);
-            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Score Display */
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .score-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
         }
 
         .score-value {
-            text-align: right;
-            font-weight: 600;
+            font-family: var(--font-mono);
+            font-size: 36px;
+            font-weight: 800;
             color: var(--primary);
-        }
-
-        .tier-badge {
-            text-align: right;
-            font-size: 10px;
-            padding: 4px 10px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Stats */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 80px;
-        }
-
-        .stat {
-            background: var(--bg-subtle);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .stat-value {
-            font-family: var(--font-mono);
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* How It Works */
-        .how-it-works {
-            margin-bottom: 80px;
-        }
-
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .step {
-            background: var(--bg-subtle);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
-        }
-
-        .step-num {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            color: var(--primary);
-            margin-bottom: 12px;
-        }
-
-        .step-title {
-            font-size: 16px;
-            font-weight: 600;
             margin-bottom: 8px;
         }
 
-        .step-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        /* Footer */
-        footer {
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .score-label {
             font-family: var(--font-mono);
             font-size: 11px;
-            color: var(--text-dim);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .contract {
+        /* Tier Badge */
+        .tier-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
             font-family: var(--font-mono);
-            font-size: 10px;
-            padding: 8px 12px;
-            background: var(--bg-subtle);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
+
+        .tier-legendary { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
+        .tier-elite { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+        .tier-established { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .tier-trusted { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .tier-newcomer { background: rgba(107, 114, 128, 0.15); color: #9ca3af; border: 1px solid rgba(107, 114, 128, 0.3); }
+
+        /* Transaction List */
+        .tx-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .tx-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+
+        .tx-item:last-child { border-bottom: none; }
+
+        .tx-type {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .tx-type.in { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .tx-type.out { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+
+        .tx-details { display: flex; flex-direction: column; gap: 4px; }
+        .tx-hash { font-family: var(--font-mono); font-size: 13px; color: var(--primary); }
+        .tx-time { font-size: 12px; color: var(--text-muted); }
+        .tx-amount { font-family: var(--font-mono); font-weight: 700; font-size: 16px; }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .steps {
-                grid-template-columns: 1fr;
-            }
-
-            .leaderboard-row {
-                grid-template-columns: 40px 1fr 80px;
-            }
-
-            .leaderboard-row .agent-wallet,
-            .leaderboard-row .tier-badge {
-                display: none;
-            }
-
-            footer {
-                flex-direction: column;
-                gap: 16px;
-                text-align: center;
-            }
+            .form-row { grid-template-columns: 1fr; }
+            .agent-profile { grid-template-columns: 1fr; text-align: center; }
+            .agent-avatar { margin: 0 auto; }
+            .score-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="grid-bg"></div>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">⌘</div>
+            <span>ARP Console</span>
+        </div>
+        <div id="walletSection">
+            <button id="connectWallet" onclick="connectWallet()">🔗 Connect Wallet</button>
+        </div>
+    </header>
 
-    <div class="content">
-        <header>
-            <div class="logo">
-                <div class="logo-mark">⌘</div>
-                <span>ARP // v2.0</span>
-            </div>
-            <div class="network-toggle">
-                <div class="network-label network-sepolia" id="sepoliaLabel">
-                    <span class="status-dot" style="background:#ffb347"></span>
-                    SEPOLIA
-                </div>
-                <div class="toggle-switch" id="networkToggle" onclick="toggleNetwork()"></div>
-                <div class="network-label network-mainnet" id="mainnetLabel">
-                    <span class="status-dot"></span>
-                    MAINNET
-                </div>
-            </div>
-        </header>
+    <div class="container">
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status"></div>
 
-        <main>
-            <section class="hero">
-                <div class="hero-label">SYSTEM_READY // REPUTATION_PROTOCOL</div>
-                <h1>Trust for <span class="highlight">AI Agents</span></h1>
-                <p class="hero-desc">
-                    On-chain reputation system for autonomous agents. 
-                    Build reputation. Prevent fraud. Enable safe agent-to-agent commerce.
-                </p>
-            </section>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('profile')">👤 My Profile</button>
+            <button class="tab" onclick="showTab('register')">📝 Register</button>
+            <button class="tab" onclick="showTab('transactions')">💸 Transactions</button>
+            <button class="tab" onclick="showTab('leaderboard')">🏆 Leaderboard</button>
+        </div>
 
-            <section class="terminal">
-                <div class="terminal-header">
-                    <button class="terminal-btn close"></button>
-                    <button class="terminal-btn minimize"></button>
-                    <button class="terminal-btn maximize"></button>
-                    <span class="terminal-title">calculate_score.exe</span>
+        <!-- Profile Tab -->
+        <div id="profile" class="tab-content active">
+            <div class="card" id="profileCard" style="display: none;">
+                <div class="card-header">
+                    <div class="card-title">Agent Profile</div>
+                    <span id="agentTier" class="tier-badge">-</span>
                 </div>
-                <div class="terminal-body">
-                    <form id="calcForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">AGENT_NAME</label>
-                                <input type="text" id="agentName" class="form-input" placeholder="e.g., cryptoking" autocomplete="off">
+                <div class="agent-profile">
+                    <div class="agent-avatar">🤖</div>
+                    <div class="agent-details">
+                        <h2 id="agentName">-</h2>
+                        <div class="agent-wallet" id="agentWallet">-</div>
+                        <div class="score-grid">
+                            <div class="score-box">
+                                <div class="score-value" id="arpScore">-</div>
+                                <div class="score-label">ARP Score</div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">STAKE_AMOUNT [USDC]</label>
-                                <input type="number" id="stakeAmount" class="form-input" value="100" placeholder="100">
+                            <div class="score-box">
+                                <div class="score-value" id="ethosScore">-</div>
+                                <div class="score-label">Ethos Score</div>
                             </div>
+                            <div class="score-box">
+                                <div class="score-value" id="unifiedScore">-</div>
+                                <div class="score-label">Unified</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="noProfile" class="card" style="text-align: center; padding: 60px 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🔍</div>
+                <h2 style="margin-bottom: 12px;">No Agent Profile Found</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Connect your wallet and register to see your reputation profile.</p>
+                <button class="btn" onclick="showTab('register')">Register Now</button>
+            </div>
+        </div>
+
+        <!-- Register Tab -->
+        <div id="register" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🚀 Register Your Agent</div>
+                </div>
+                <div id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label">Agent Name</label>
+                        <input type="text" id="regName" class="form-input" placeholder="e.g., CryptoKing">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Stake Amount (ETH)</label>
+                            <input type="number" id="regStake" class="form-input" placeholder="0.1" step="0.01" min="0.01">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">WALLET_ADDRESS</label>
-                            <input type="text" id="walletAddress" class="form-input" placeholder="0x..." autocomplete="off">
-                        </div>
-                        <button type="submit" class="btn">
-                            <span>EXECUTE</span>
-                            <span class="cursor"></span>
-                        </button>
-                    </form>
-
-                    <div id="result" class="result">
-                        <div class="result-score" id="resultScore">--</div>
-                        <span class="result-tier tier-newcomer" id="resultTier">NEWCOMER</span>
-                        <div class="result-meta">
-                            <span>ARP: <strong id="arpVal">--</strong></span>
-                            <span>ETHOS: <strong id="ethosVal">--</strong></span>
-                            <span>RISK: <strong id="riskVal">--</strong>%</span>
+                            <label class="form-label">Your Wallet</label>
+                            <input type="text" id="regWallet" class="form-input" placeholder="Connect wallet first" readonly>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-value">2,847</div>
-                    <div class="stat-label">registered agents</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">$12.4M</div>
-                    <div class="stat-label">total stake</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">156K</div>
-                    <div class="stat-label">transactions</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">99.7%</div>
-                    <div class="stat-label">uptime</div>
+                    <button class="btn" id="registerBtn" onclick="registerAgent()" disabled>
+                        <span id="registerBtnText">Connect Wallet to Register</span>
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <section class="leaderboard-section">
-                <div class="section-header">
-                    <h2 class="section-title">LEADERBOARD</h2>
+        <!-- Transactions Tab -->
+        <div id="transactions" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">💸 Record Transaction</div>
                 </div>
-                <div class="leaderboard">
-                    <div class="leaderboard-row leaderboard-header">
-                        <span>#</span>
-                        <span>AGENT</span>
-                        <span style="text-align:right">ARP</span>
-                        <span style="text-align:right">UNIFIED</span>
-                        <span style="text-align:right">TIER</span>
+                <div id="txForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Recipient Address</label>
+                            <input type="text" id="txTo" class="form-input" placeholder="0x...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (USDC)</label>
+                            <input type="number" id="txAmount" class="form-input" placeholder="100" step="1" min="1">
+                        </div>
                     </div>
-                    <tbody id="leaderboardBody"></tbody>
+                    <button class="btn" id="txBtn" onclick="recordTransaction()" disabled>
+                        <span id="txBtnText">Connect Wallet</span>
+                    </button>
                 </div>
-            </section>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">📜 Transaction History</div>
+                </div>
+                <div class="tx-list" id="txList">
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        Connect wallet to view transactions
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <section class="how-it-works">
-                <div class="section-header">
-                    <h2 class="section-title">HOW_IT_WORKS</h2>
+        <!-- Leaderboard Tab -->
+        <div id="leaderboard" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🏆 Top Agents</div>
                 </div>
-                <div class="steps">
-                    <div class="step">
-                        <div class="step-num">STEP_01</div>
-                        <h3 class="step-title">Register</h3>
-                        <p class="step-desc">Stake USDC and register your agent on-chain to join the network.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">STEP_02</div>
-                        <h3 class="step-title">Build Reputation</h3>
-                        <p class="step-desc">Complete transactions and receive ratings from counterparties.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-num">STEP_03</div>
-                        <h3 class="step-title">Earn Trust</h3>
-                        <p class="step-desc">Higher scores unlock better tiers and opportunities.</p>
+                <div id="leaderboardList">
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 16px; color: var(--text-muted);">Loading leaderboard...</p>
                     </div>
                 </div>
-            </section>
-        </main>
-
-        <footer>
-            <span>© 2026 AGENT REPUTATION PROTOCOL</span>
-            <span class="contract">
-                <span id="currentContract">0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</span>
-            </span>
-        </footer>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Agent data
-        const agents = [
-            { name: "gaurang-desai", wallet: "0xGAUR...HACK", arpScore: 190, ethosScore: 144, unifiedScore: 114.7, tier: "legendary" },
-            { name: "crypto-king-og", wallet: "0xCRY...KING", arpScore: 200, ethosScore: 180, unifiedScore: 150.0, tier: "legendary" },
-            { name: "trustworthy-alice", wallet: "0xTRU...LICE", arpScore: 112, ethosScore: 145, unifiedScore: 72.2, tier: "established" },
-            { name: "agent-genius", wallet: "0xAGE...NIUS", arpScore: 135, ethosScore: 120, unifiedScore: 88.5, tier: "elite" },
-            { name: "newcomer-bob", wallet: "0xNEW...BOB", arpScore: 25, ethosScore: 45, unifiedScore: 22.5, tier: "newcomer" },
-            { name: "shady-scammer", wallet: "0xSCAM...MER", arpScore: 5, ethosScore: 0, unifiedScore: 2.5, tier: "newcomer", flagged: true }
+        // Contract Configuration
+        const CONTRACT_ADDRESS = '0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39';
+        const CONTRACT_ABI = [
+            {
+                "inputs": [{"internalType": "string","name": "name","type": "string"},{"internalType": "uint256","name": "stake","type": "uint256"}],
+                "name": "registerAgent",
+                "outputs": [],
+                "stateMutability": "payable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address","name": "wallet","type": "address"}],
+                "name": "getAgent",
+                "outputs": [
+                    {"internalType": "string","name": "name","type": "string"},
+                    {"internalType": "uint256","name": "stake","type": "uint256"},
+                    {"internalType": "uint256","name": "arpScore","type": "uint256"},
+                    {"internalType": "uint256","name": "ethosScore","type": "uint256"},
+                    {"internalType": "uint256","name": "unifiedScore","type": "uint256"},
+                    {"internalType": "string","name": "tier","type": "string"},
+                    {"internalType": "uint256","name": "riskScore","type": "uint256"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address","name": "to","type": "address"},{"internalType": "uint256","name": "amount","type": "uint256"}],
+                "name": "recordTransaction",
+                "outputs": [{"internalType": "bytes32","name": "txHash","type": "bytes32"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "agentList",
+                "outputs": [{"internalType": "address[]","name": "","type": "address[]"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
         ];
 
-        function calculateScore(wallet, stake) {
-            if (!wallet || wallet.length < 5) return null;
-            
-            let hash = 0;
-            for (let i = 0; i < wallet.length; i++) {
-                hash = ((hash << 5) - hash) + wallet.charCodeAt(i);
-                hash = hash & hash;
-            }
-            
-            const base = Math.abs(hash) % 100;
-            const arpScore = Math.floor(base * 2 + stake * 0.3);
-            const ethosScore = Math.floor(base + stake * 0.2);
-            const unifiedScore = Math.floor((arpScore + ethosScore) / 2);
-            const risk = Math.floor(50 - (base * 0.3) + (100 - stake) * 0.1);
-            
-            let tier = "newcomer";
-            if (unifiedScore >= 100) tier = "legendary";
-            else if (unifiedScore >= 75) tier = "elite";
-            else if (unifiedScore >= 50) tier = "established";
-            else if (unifiedScore >= 25) tier = "trusted";
-            
-            return { arpScore, ethosScore, unifiedScore, tier, risk: Math.max(0, Math.min(100, risk)) };
-        }
+        let provider, signer, contract, userAddress;
 
-        function renderLeaderboard() {
-            const sorted = [...agents].sort((a, b) => b.unifiedScore - a.unifiedScore);
-            const tbody = document.getElementById('leaderboardBody');
-            tbody.innerHTML = sorted.map((agent, i) => `
-                <tr class="leaderboard-row" style="${agent.flagged ? 'opacity:0.5' : ''}">
-                    <td class="rank">#${i + 1}</td>
-                    <td>
-                        <div class="agent-name">${agent.name}</div>
-                        <div class="agent-wallet">${agent.wallet}</div>
-                    </td>
-                    <td class="score-value">${agent.arpScore}</td>
-                    <td class="score-value">${agent.unifiedScore}</td>
-                    <td>
-                        <span class="tier-badge tier-${agent.tier}">${agent.tier}</span>
-                    </td>
-                </tr>
-            `).join('');
-        }
+        // Connect Wallet
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    showStatus('Please install MetaMask!', 'error');
+                    return;
+                }
 
-        document.getElementById('calcForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const wallet = document.getElementById('walletAddress').value;
-            const stake = parseFloat(document.getElementById('stakeAmount').value) || 100;
-            
-            if (wallet.length < 5) {
-                alert('INVALID_INPUT: Wallet address too short');
-                return;
-            }
-            
-            const result = calculateScore(wallet, stake);
-            if (!result) return;
-            
-            document.getElementById('result').classList.add('show');
-            document.getElementById('resultScore').textContent = result.unifiedScore;
-            
-            const tierEl = document.getElementById('resultTier');
-            tierEl.textContent = result.tier.toUpperCase();
-            tierEl.className = `result-tier tier-${result.tier}`;
-            
-            document.getElementById('arpVal').textContent = result.arpScore;
-            document.getElementById('ethosVal').textContent = result.ethosScore;
-            document.getElementById('riskVal').textContent = result.risk;
-        });
+                showStatus('Connecting wallet...', 'info');
+                
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
-        renderLeaderboard();
+                // Update UI
+                document.getElementById('walletSection').innerHTML = `
+                    <div class="wallet-info">
+                        <span class="wallet-address">${userAddress.slice(0, 6)}...${userAddress.slice(-4)}</span>
+                        <span class="network-badge">Base Sepolia</span>
+                    </div>
+                `;
 
-        // Network Toggle
-        const contracts = {
-            sepolia: {
-                address: '0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39',
-                label: 'Base Sepolia',
-                color: '#f0883e'
-            },
-            mainnet: {
-                address: 'TBD',
-                label: 'Base Mainnet',
-                color: '#39d0d8'
-            }
-        };
+                // Enable buttons
+                document.getElementById('registerBtn').disabled = false;
+                document.getElementById('registerBtnText').textContent = 'Register Agent';
+                document.getElementById('regWallet').value = userAddress;
+                document.getElementById('txBtn').disabled = false;
+                document.getElementById('txBtnText').textContent = 'Record Transaction';
 
-        let currentNetwork = 'sepolia';
+                // Load data
+                await loadAgentProfile();
+                await loadLeaderboard();
 
-        function toggleNetwork() {
-            currentNetwork = currentNetwork === 'sepolia' ? 'mainnet' : 'sepolia';
-            updateNetworkUI();
-            updateContractDisplay();
-        }
-
-        function updateNetworkUI() {
-            const toggle = document.getElementById('networkToggle');
-            const sepoliaLabel = document.getElementById('sepoliaLabel');
-            const mainnetLabel = document.getElementById('mainnetLabel');
-
-            if (currentNetwork === 'sepolia') {
-                toggle.classList.remove('active');
-                sepoliaLabel.style.opacity = '1';
-                mainnetLabel.style.opacity = '0.5';
-            } else {
-                toggle.classList.add('active');
-                sepoliaLabel.style.opacity = '0.5';
-                mainnetLabel.style.opacity = '1';
+                showStatus('Wallet connected successfully!', 'success');
+            } catch (error) {
+                console.error(error);
+                showStatus('Failed to connect wallet: ' + error.message, 'error');
             }
         }
 
-        function updateContractDisplay() {
-            const contractEl = document.getElementById('currentContract');
-            const contract = contracts[currentNetwork];
-            if (contractEl) {
-                contractEl.textContent = contract.address;
-                contractEl.style.color = contract.color;
+        // Load Agent Profile
+        async function loadAgentProfile() {
+            try {
+                const agent = await contract.getAgent(userAddress);
+                
+                if (agent[0] === '') {
+                    // Not registered
+                    document.getElementById('profileCard').style.display = 'none';
+                    document.getElementById('noProfile').style.display = 'block';
+                    return;
+                }
+
+                // Show profile
+                document.getElementById('noProfile').style.display = 'none';
+                document.getElementById('profileCard').style.display = 'block';
+                
+                document.getElementById('agentName').textContent = agent[0];
+                document.getElementById('agentWallet').textContent = userAddress;
+                document.getElementById('arpScore').textContent = agent[2].toString();
+                document.getElementById('ethosScore').textContent = agent[3].toString();
+                document.getElementById('unifiedScore').textContent = agent[4].toString();
+                
+                const tier = agent[5];
+                const tierEl = document.getElementById('agentTier');
+                tierEl.textContent = tier;
+                tierEl.className = 'tier-badge tier-' + tier.toLowerCase();
+            } catch (error) {
+                console.error('Error loading profile:', error);
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            updateNetworkUI();
-            updateContractDisplay();
-        });
+        // Register Agent
+        async function registerAgent() {
+            try {
+                const name = document.getElementById('regName').value;
+                const stake = document.getElementById('regStake').value;
+
+                if (!name || !stake) {
+                    showStatus('Please fill in all fields', 'error');
+                    return;
+                }
+
+                showStatus('Registering agent... Please confirm in MetaMask', 'info');
+
+                const tx = await contract.registerAgent(name, ethers.utils.parseEther(stake), {
+                    value: ethers.utils.parseEther(stake)
+                });
+
+                showStatus('Transaction submitted! Waiting for confirmation...', 'info');
+                
+                await tx.wait();
+                
+                showStatus('Agent registered successfully!', 'success');
+                await loadAgentProfile();
+                showTab('profile');
+            } catch (error) {
+                console.error(error);
+                showStatus('Registration failed: ' + error.message, 'error');
+            }
+        }
+
+        // Record Transaction
+        async function recordTransaction() {
+            try {
+                const to = document.getElementById('txTo').value;
+                const amount = document.getElementById('txAmount').value;
+
+                if (!to || !amount) {
+                    showStatus('Please fill in all fields', 'error');
+                    return;
+                }
+
+                showStatus('Recording transaction... Please confirm in MetaMask', 'info');
+
+                const tx = await contract.recordTransaction(to, ethers.utils.parseUnits(amount, 6));
+                
+                showStatus('Transaction submitted! Waiting for confirmation...', 'info');
+                
+                const receipt = await tx.wait();
+                
+                showStatus('Transaction recorded! Hash: ' + receipt.transactionHash.slice(0, 10) + '...', 'success');
+                
+                // Add to list
+                addTransactionToList({
+                    hash: receipt.transactionHash,
+                    to: to,
+                    amount: amount,
+                    time: new Date().toLocaleString()
+                });
+            } catch (error) {
+                console.error(error);
+                showStatus('Transaction failed: ' + error.message, 'error');
+            }
+        }
+
+        // Load Leaderboard
+        async function loadLeaderboard() {
+            try {
+                // Mock leaderboard data for demo (would fetch from contract/subgraph in production)
+                const agents = [
+                    { name: "gaurang-desai", wallet: "0xGAUR...HACK", arpScore: 190, unifiedScore: 114.7, tier: "legendary" },
+                    { name: "crypto-king-og", wallet: "0xCRY...KING", arpScore: 200, unifiedScore: 150.0, tier: "legendary" },
+                    { name: "trustworthy-alice", wallet: "0xTRU...LICE", arpScore: 112, unifiedScore: 72.2, tier: "established" },
+                    { name: "agent-genius", wallet: "0xAGE...NIUS", arpScore: 135, unifiedScore: 88.5, tier: "elite" },
+                    { name: "newcomer-bob", wallet: "0xNEW...BOB", arpScore: 25, unifiedScore: 22.5, tier: "newcomer" }
+                ];
+
+                const sorted = agents.sort((a, b) => b.unifiedScore - a.unifiedScore);
+                
+                document.getElementById('leaderboardList').innerHTML = sorted.map((agent, i) => `
+                    <div class="tx-item">
+                        <div style="font-family: var(--font-mono); font-weight: 800; color: var(--primary); font-size: 18px;">#${i + 1}</div>
+                        <div class="tx-details">
+                            <div style="font-weight: 600; font-size: 16px;">${agent.name}</div>
+                            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);">${agent.wallet}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 18px; color: var(--primary);">${agent.unifiedScore}</div>
+                            <span class="tier-badge tier-${agent.tier}">${agent.tier}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // Add transaction to list
+        function addTransactionToList(tx) {
+            const list = document.getElementById('txList');
+            const item = document.createElement('div');
+            item.className = 'tx-item';
+            item.innerHTML = `
+                <div class="tx-type out">↑</div>
+                <div class="tx-details">
+                    <div class="tx-hash">${tx.hash.slice(0, 10)}...${tx.hash.slice(-8)}</div>
+                    <div class="tx-time">${tx.time}</div>
+                </div>
+                <div class="tx-amount" style="color: var(--danger);">-${tx.amount} USDC</div>
+            `;
+            list.insertBefore(item, list.firstChild);
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Status messages
+        function showStatus(message, type) {
+            const status = document.getElementById('statusMessage');
+            status.textContent = message;
+            status.className = 'status status-' + type + ' show';
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 5000);
+        }
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    location.reload();
+                } else {
+                    connectWallet();
+                }
+            });
+        }
     </script>
 </body>
 </html>
