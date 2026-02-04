@@ -171,6 +171,104 @@ Score = (Avg Rating × 20) + (Stake × 0.1) + (TX Count × 2)
 
 ---
 
+## 🎉 ARP x ETHOS INTEGRATION v1.0
+
+**NEW:** ARP now integrates with Ethos Network for unified trust scoring!
+
+### What Is Ethos?
+
+[Ethos](https://www.ethos.network) is a credibility platform that creates a more trusted web3 ecosystem through:
+- 📝 **Reviews** - Document trustworthy/untrustworthy actors
+- 👍 **Vouching** - Back others with your reputation
+- ⚔️ **Slashing** - Penalize bad actors
+- 📊 **Credibility Scores** - Unified trust metrics
+
+### Why ARP x Ethos?
+
+| Aspect | ARP | Ethos | Combined |
+|--------|-----|-------|----------|
+| **Focus** | AI Agents | All crypto users | Whole ecosystem |
+| **Mechanism** | On-chain ratings | Reviews/vouches/slashes | All mechanisms |
+| **Scope** | Agent-to-agent | Human-to-human | Human + Agent commerce |
+| **Extension** | OpenClaw skill | Chrome extension | Universal trust |
+
+### Unified Scoring
+
+```
+Final Score = (ARP Reputation × 0.5) + (Ethos Credibility × 0.5)
+```
+
+### Features
+
+1. **Cross-Referenced Scores**
+   - Query Ethos API for credibility scores
+   - Combine with ARP agent reputation
+   - More robust trust signal!
+
+2. **Shared Slashing Database**
+   - Bad actors flagged in ARP → Sync to Ethos
+   - Scammers caught on Ethos → Auto-flag in ARP
+   - Unified blacklist!
+
+3. **Dual Oracles**
+   - ARP Oracles = Elite agents
+   - Ethos Vouchers = Trusted humans
+   - Both contribute to unified score
+
+4. **Trust Propagation**
+   - Crypto OG vouches for agent → Boost
+   - Agent rated highly → Ethos credibility up
+   - Network effects amplify trust
+
+### Usage
+
+```bash
+# Run the integration demo
+python3 skills/agent-reputation/arp_ethos_integration.py
+
+# Or import in your code
+from arp_ethos_integration import ARPxEthosIntegration
+
+# Create unified system
+integration = ARPxEthosIntegration("My-Unified-System")
+
+# Register agent with ARP + Ethos data
+agent = integration.register_agent(
+    name="Agent-Genius",
+    address="0x...",
+    eth_address="0x...",  # For Ethos lookup
+    arp_stake=50.0,
+    ethos_wallet_age=2.0,  # Years on chain
+    ethos_vouches=20,
+    ethos_positive_reviews=50,
+    ethos_negative_reviews=1,
+    # ... more Ethos data
+)
+
+# Get unified trust score
+trust = integration.get_trust_score(agent.address)
+print(f"Unified Score: {trust['unified_score']}")
+print(f"Tier: {trust['unified_tier']}")
+```
+
+### Demo Output
+
+```
+🏆 FINAL LEADERBOARD
+1. CryptoKing-OG: 👑 LEGENDARY (100.3)
+2. Agent-Genius: 🏅 ESTABLISHED (66.0)
+3. Newcomer-Bob: 🆕 NEWCOMER (17.5)
+4. Shady-Scammer: 🆕 NEWCOMER (5.6) ⚠️ FLAGGED
+```
+
+### Partnership Opportunity
+
+ARP x Ethos = Ultimate Trust Layer for AI Agents!
+
+**Contact:** Ethos team for API access and partnership
+
+---
+
 ## 🚀 Quick Start
 
 ```bash
