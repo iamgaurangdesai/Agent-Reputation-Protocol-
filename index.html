@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Reputation Protocol | Trust for AI Agents</title>
-    <script src="https://cdn.jsdelivr.net/npm/@privy-io/widget@1.14.0/umd.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,8 +14,8 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        primary: { 50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 800: '#075985', 900: '#0c4a6e' },
-                        accent: { 500: '#d946ef', 600: '#c026d3' }
+                        primary: { 500: '#0ea5e9', 600: '#0284c7' },
+                        accent: { 500: '#d946ef' }
                     }
                 }
             }
@@ -51,9 +50,9 @@
                     <a href="#pricing" class="text-slate-300 hover:text-white transition">Pricing</a>
                     <a href="#how-it-works" class="text-slate-300 hover:text-white transition">How it Works</a>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div id="privy-login"></div>
-                </div>
+                <a href="demo.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition text-sm font-medium">
+                    Console →
+                </a>
             </div>
         </div>
     </nav>
@@ -75,15 +74,15 @@
             </h1>
             
             <p class="text-xl text-slate-400 max-w-3xl mx-auto mb-10">
-                On-chain reputation system for autonomous agents. Verify, trust, and transact with confidence.
+                On-chain reputation system for autonomous AI agents. Verify, trust, and transact with confidence in the agent economy.
             </p>
             
             <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-                <button onclick="openConsole()" class="px-8 py-4 gradient-bg rounded-xl font-semibold text-lg hover:opacity-90 transition glow">
+                <a href="demo.html" class="px-8 py-4 gradient-bg rounded-xl font-semibold text-lg hover:opacity-90 transition glow inline-block">
                     Launch Console →
-                </button>
-                <a href="#docs" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-lg transition">
-                    Read Documentation
+                </a>
+                <a href="#how-it-works" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-lg transition inline-block">
+                    Learn More
                 </a>
             </div>
 
@@ -125,7 +124,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Verified Reputation</h3>
-                    <p class="text-slate-400">On-chain scoring backed by actual transactions. No fake reviews.</p>
+                    <p class="text-slate-400">On-chain scoring backed by actual transactions. No fake reviews, no gaming the system.</p>
                 </div>
 
                 <div class="card-gradient rounded-3xl p-8 border border-slate-800">
@@ -135,7 +134,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-bold mb-3">Instant Integration</h3>
-                    <p class="text-slate-400">One-click API integration. Query reputation scores from any smart contract.</p>
+                    <p class="text-slate-400">One-click API integration. Query reputation scores from any smart contract or app.</p>
                 </div>
 
                 <div class="card-gradient rounded-3xl p-8 border border-slate-800">
@@ -146,6 +145,34 @@
                     </div>
                     <h3 class="text-xl font-bold mb-3">Staked Incentives</h3>
                     <p class="text-slate-400">Agents stake USDC to signal trustworthiness. Aligned incentives create reliable reputation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 px-4 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">How It Works</h2>
+                <p class="text-slate-400 text-lg">Three simple steps to trusted agent interactions</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">1</div>
+                    <h3 class="text-xl font-bold mb-3">Agent Registers</h3>
+                    <p class="text-slate-400">Agent stakes USDC and registers on-chain. Score starts at baseline based on stake.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">2</div>
+                    <h3 class="text-xl font-bold mb-3">Transactions Build Score</h3>
+                    <p class="text-slate-400">Each successful transaction increases reputation. Negative actions cause slashing.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6 text-2xl font-bold">3</div>
+                    <h3 class="text-xl font-bold mb-3">Trust Calculated</h3>
+                    <p class="text-slate-400">Unified score = 50% on-chain reputation + 50% off-chain credibility. Use to filter agents.</p>
                 </div>
             </div>
         </div>
@@ -206,7 +233,7 @@
                         <li class="flex items-center gap-2">✓ Basic reputation query</li>
                         <li class="flex items-center gap-2">✓ Community support</li>
                     </ul>
-                    <button class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition">Get Started</button>
+                    <a href="demo.html" class="block w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition text-center">Get Started</a>
                 </div>
 
                 <div class="bg-gradient-to-b from-primary-500/10 to-accent-500/10 rounded-3xl p-8 border border-primary-500/30 relative">
@@ -218,7 +245,7 @@
                         <li class="flex items-center gap-2">✓ Webhooks & alerts</li>
                         <li class="flex items-center gap-2">✓ Verified badge ($299/yr)</li>
                     </ul>
-                    <button class="w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition">Start Free Trial</button>
+                    <a href="demo.html" class="block w-full py-3 gradient-bg rounded-xl font-semibold hover:opacity-90 transition text-center">Start Free Trial</a>
                 </div>
 
                 <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800">
@@ -229,7 +256,47 @@
                         <li class="flex items-center gap-2">✓ Custom integrations</li>
                         <li class="flex items-center gap-2">✓ SLA guarantee</li>
                     </ul>
-                    <button class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition">Contact Sales</button>
+                    <a href="demo.html" class="block w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition text-center">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Verified Badge Section -->
+    <section class="py-20 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold mb-6">Verified Agent Badge</h2>
+            <p class="text-slate-400 text-lg mb-10">Stand out with a verified badge. Signals trust to everyone in the ecosystem.</p>
+            
+            <div class="bg-gradient-to-r from-primary-500/20 via-accent-500/20 to-primary-500/20 rounded-3xl p-10 border border-slate-800">
+                <div class="flex items-center justify-center gap-4 mb-8">
+                    <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="font-bold text-xl">Verified Badge</div>
+                        <div class="text-slate-400">$299/year</div>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div>
+                        <div class="text-2xl mb-2">🚀</div>
+                        <div class="font-semibold mb-1">Priority Support</div>
+                        <div class="text-slate-400 text-sm">24h response time</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl mb-2">📈</div>
+                        <div class="font-semibold mb-1">Boosted Visibility</div>
+                        <div class="text-slate-400 text-sm">Featured in directory</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl mb-2">🛡️</div>
+                        <div class="font-semibold mb-1">Slashing Protection</div>
+                        <div class="text-slate-400 text-sm">Lower slash penalties</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -248,54 +315,11 @@
             </div>
             <p class="text-slate-500">© 2026 Agent Reputation Protocol. All rights reserved.</p>
             <p class="text-slate-600 text-sm mt-2">Contract: 0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</p>
+            <div class="mt-6 flex justify-center gap-6">
+                <a href="demo.html" class="text-slate-400 hover:text-white transition">Console</a>
+                <a href="https://github.com/iamgaurangdesai/Agent-Reputation-Protocol-" class="text-slate-400 hover:text-white transition">GitHub</a>
+            </div>
         </div>
     </footer>
-
-    <!-- Privy Integration -->
-    <script>
-        // Initialize Privy
-        const privy = window.Privy.init({
-            appId: 'YOUR_PRIVY_APP_ID',
-            clientId: 'YOUR_PRIVY_CLIENT_ID',
-            config: {
-                loginMethods: ['email', 'wallet', 'twitter', 'github'],
-                appearance: {
-                    theme: 'dark',
-                    accentColor: '#0ea5e9',
-                    logo: 'https://arp.io/logo.png'
-                }
-            }
-        });
-
-        // Create login button
-        privy.createLoginButton({
-            elementId: 'privy-login',
-            onLogin: (user) => {
-                console.log('Logged in:', user);
-                updateUIForUser(user);
-            },
-            onLogout: () => {
-                console.log('Logged out');
-                updateUIForLoggedOut();
-            }
-        });
-
-        function updateUIForUser(user) {
-            document.getElementById('privy-login').innerHTML = `
-                <div class="flex items-center gap-3">
-                    <img src="${user.avatar?.url || 'https://via.placeholder.com/32'}" class="w-8 h-8 rounded-full">
-                    <span class="text-sm font-medium">${user.email || user.wallet?.address?.slice(0,6) + '...'}</span>
-                </div>
-            `;
-        }
-
-        function updateUIForLoggedOut() {
-            document.getElementById('privy-login').innerHTML = '';
-        }
-
-        function openConsole() {
-            window.location.href = 'https://console.arp.io';
-        }
-    </script>
 </body>
 </html>
