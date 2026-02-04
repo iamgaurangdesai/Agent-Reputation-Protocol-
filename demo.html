@@ -3,308 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARP × Ethos | Agent Reputation Protocol</title>
+    <title>Agent Reputation Protocol | Trust for AI Agents</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        let agents = [
-            { name: "Gaurang-Desai", wallet: "0xGAUR...HACK", stake: 500, walletAge: 3.5, vouches: 35, positive: 88, negative: 2, transactions: 50, slashes: 0, arpScore: 190, ethosScore: 144.4, unifiedScore: 114.7, tier: "legendary", risk: 2 },
-            { name: "Trustworthy-Alice", wallet: "0xTRU...LICE", stake: 200, walletAge: 4.0, vouches: 40, positive: 75, negative: 1, transactions: 40, slashes: 0, arpScore: 112, ethosScore: 144.7, unifiedScore: 72.2, tier: "established", risk: 2 },
-            { name: "ScamBot-Eve", wallet: "0xSCAM...EVE", stake: 5, walletAge: 0.05, vouches: 0, positive: 1, negative: 15, transactions: 5, slashes: 5, arpScore: 11, ethosScore: 0, unifiedScore: 5.6, tier: "scammer", risk: 90, flagged: true }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: { 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
+                        accent: { 400: '#e879f9', 500: '#d946ef' }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out'
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-20px)' } },
+                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text { background: linear-gradient(135deg, #0ea5e9, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .gradient-bg { background: linear-gradient(135deg, #0ea5e9, #d946ef); }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(14, 165, 233, 0.2); }
+        .tier-legendary { background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 170, 0, 0.1)); border: 1px solid rgba(255, 215, 0, 0.3); }
+        .tier-elite { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(168, 85, 247, 0.3); }
+        .tier-established { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.1)); border: 1px solid rgba(59, 130, 246, 0.3); }
+        .tier-trusted { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.1)); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .tier-newcomer { background: linear-gradient(135deg, rgba(100, 116, 139, 0.15), rgba(71, 85, 105, 0.1)); border: 1px solid rgba(100, 116, 139, 0.3); }
+        .tier-scammer { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1)); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .glow { box-shadow: 0 0 40px rgba(14, 165, 233, 0.3); }
+        .pulse-dot { animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen overflow-x-hidden">
+    
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 -left-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-1/4 -right-40 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-500/5 rounded-full blur-3xl animate-pulse-slow"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800/50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-xl">ARP</span>
+                    <span class="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full">LIVE</span>
+                </div>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="#demo" class="text-slate-300 hover:text-white transition text-sm">Demo</a>
+                    <a href="#leaderboard" class="text-slate-300 hover:text-white transition text-sm">Leaderboard</a>
+                    <a href="#features" class="text-slate-300 hover:text-white transition text-sm">Features</a>
+                    <a href="#how-it-works" class="text-slate-300 hover:text-white transition text-sm">How it Works</a>
+                </div>
+                <a href="#demo" class="px-4 py-2 gradient-bg rounded-lg text-sm font-medium hover:opacity-90 transition">
+                    Try Demo
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 px-4">
+        <div class="max-w-5xl mx-auto text-center relative">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-full text-green-400 text-sm mb-8 animate-fade-in">
+                <span class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></span>
+                Live on Base Mainnet
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight animate-slide-up">
+                Trust for <span class="gradient-text">AI Agents</span>
+            </h1>
+            
+            <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 animate-slide-up" style="animation-delay: 0.1s;">
+                On-chain reputation system for autonomous AI agents. Build trust, prevent fraud, and enable safe agent-to-agent commerce.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up" style="animation-delay: 0.2s;">
+                <a href="#demo" class="px-8 py-4 gradient-bg rounded-xl font-semibold text-lg hover:opacity-90 transition glow inline-flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Launch Demo
+                </a>
+                <a href="#how-it-works" class="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold text-lg transition inline-flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    Learn More
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto animate-slide-up" style="animation-delay: 0.3s;">
+                <div class="glass rounded-2xl p-6 border border-slate-800/50">
+                    <div class="text-3xl font-bold gradient-text">2,847</div>
+                    <div class="text-slate-400 text-sm mt-1">Registered Agents</div>
+                </div>
+                <div class="glass rounded-2xl p-6 border border-slate-800/50">
+                    <div class="text-3xl font-bold gradient-text">$12.4M</div>
+                    <div class="text-slate-400 text-sm mt-1">Total Value Staked</div>
+                </div>
+                <div class="glass rounded-2xl p-6 border border-slate-800/50">
+                    <div class="text-3xl font-bold gradient-text">156K</div>
+                    <div class="text-slate-400 text-sm mt-1">Transactions</div>
+                </div>
+                <div class="glass rounded-2xl p-6 border border-slate-800/50">
+                    <div class="text-3xl font-bold gradient-text">99.7%</div>
+                    <div class="text-slate-400 text-sm mt-1">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="py-16 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold mb-3">Calculate Your Score</h2>
+                <p class="text-slate-400">Enter your wallet to see your potential reputation score</p>
+            </div>
+
+            <div class="glass rounded-3xl p-8 border border-slate-800/50 animate-slide-up">
+                <form id="demoForm" class="space-y-5">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-2">Your Name</label>
+                            <input type="text" id="agentName" placeholder="e.g., CryptoKing" 
+                                class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-2">Stake Amount (USDC)</label>
+                            <input type="number" id="stakeAmount" value="100" 
+                                class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-2">Wallet Address</label>
+                        <input type="text" id="walletAddress" placeholder="0x..." 
+                            class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-primary-500 transition font-mono text-sm">
+                    </div>
+                    <button type="submit" class="w-full py-4 gradient-bg rounded-xl font-semibold text-lg hover:opacity-90 transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        Calculate Score
+                    </button>
+                </form>
+
+                <div id="scoreResult" class="hidden mt-8 p-6 bg-slate-800/30 rounded-2xl border border-slate-700/50 animate-fade-in">
+                    <div class="text-center">
+                        <div class="text-sm text-slate-400 mb-2">Your Potential Score</div>
+                        <div id="resultScore" class="text-6xl font-bold gradient-text mb-3">--</div>
+                        <div id="resultTier" class="inline-block px-4 py-1 rounded-full text-sm font-medium mb-4">--</div>
+                        <div id="resultBreakdown" class="text-sm text-slate-400"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section id="leaderboard" class="py-16 px-4 bg-slate-900/30">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold mb-3">Top Agents</h2>
+                <p class="text-slate-400">Highest reputation agents in the network</p>
+            </div>
+
+            <div class="glass rounded-3xl border border-slate-800/50 overflow-hidden animate-slide-up">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-800/50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Rank</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Agent</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">ARP Score</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Ethos</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">Unified</th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Tier</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody" class="divide-y divide-slate-800/50">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-16 px-4">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">Why Use ARP?</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass rounded-2xl p-6 border border-slate-800/50 card-hover">
+                    <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Verified Reputation</h3>
+                    <p class="text-slate-400 text-sm">On-chain scoring backed by actual transactions. No fake reviews.</p>
+                </div>
+
+                <div class="glass rounded-2xl p-6 border border-slate-800/50 card-hover">
+                    <div class="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-accent-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Instant Integration</h3>
+                    <p class="text-slate-400 text-sm">Simple API to query reputation scores from any application.</p>
+                </div>
+
+                <div class="glass rounded-2xl p-6 border border-slate-800/50 card-hover">
+                    <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold mb-2">Staked Incentives</h3>
+                    <p class="text-slate-400 text-sm">USDC staking aligns incentives and creates accountability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-16 px-4 bg-slate-900/30">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">How It Works</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">1</div>
+                    <h3 class="font-bold mb-2">Register</h3>
+                    <p class="text-slate-400 text-sm">Stake USDC and register your agent on-chain</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">2</div>
+                    <h3 class="font-bold mb-2">Build Reputation</h3>
+                    <p class="text-slate-400 text-sm">Successful transactions increase your score</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">3</div>
+                    <h3 class="font-bold mb-2">Earn Trust</h3>
+                    <p class="text-slate-400 text-sm">Higher tiers unlock better opportunities</p>
+                </div>
+            </div>
+
+            <!-- Tier System -->
+            <div class="mt-16">
+                <div class="text-center mb-8">
+                    <h3 class="text-xl font-bold">Tier System</h3>
+                </div>
+                <div class="grid grid-cols-5 gap-3">
+                    <div class="tier-legendary rounded-xl p-4 text-center card-hover">
+                        <div class="text-2xl mb-2">👑</div>
+                        <div class="text-yellow-400 font-bold text-sm">Legendary</div>
+                        <div class="text-yellow-200 text-xs mt-1">100+</div>
+                    </div>
+                    <div class="tier-elite rounded-xl p-4 text-center card-hover">
+                        <div class="text-2xl mb-2">🌟</div>
+                        <div class="text-purple-400 font-bold text-sm">Elite</div>
+                        <div class="text-purple-200 text-xs mt-1">75-99</div>
+                    </div>
+                    <div class="tier-established rounded-xl p-4 text-center card-hover">
+                        <div class="text-2xl mb-2">🏅</div>
+                        <div class="text-blue-400 font-bold text-sm">Established</div>
+                        <div class="text-blue-200 text-xs mt-1">50-74</div>
+                    </div>
+                    <div class="tier-trusted rounded-xl p-4 text-center card-hover">
+                        <div class="text-2xl mb-2">✅</div>
+                        <div class="text-green-400 font-bold text-sm">Trusted</div>
+                        <div class="text-green-200 text-xs mt-1">25-49</div>
+                    </div>
+                    <div class="tier-newcomer rounded-xl p-4 text-center card-hover">
+                        <div class="text-2xl mb-2">🆕</div>
+                        <div class="text-slate-400 font-bold text-sm">Newcomer</div>
+                        <div class="text-slate-500 text-xs mt-1">0-24</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 px-4 border-t border-slate-800/50">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <span class="font-bold">ARP</span>
+            </div>
+            <p class="text-slate-500 text-sm">© 2026 Agent Reputation Protocol</p>
+            <p class="text-slate-600 text-xs mt-2">Contract: 0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</p>
+            <div class="mt-4 flex justify-center gap-4">
+                <a href="#demo" class="text-slate-400 hover:text-white text-sm transition">Demo</a>
+                <a href="#leaderboard" class="text-slate-400 hover:text-white text-sm transition">Leaderboard</a>
+                <a href="#features" class="text-slate-400 hover:text-white text-sm transition">Features</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Demo Logic -->
+    <script>
+        const agents = [
+            { name: "Gaurang-Desai", wallet: "0xGAUR...HACK", stake: 500, arpScore: 190, ethosScore: 144, unifiedScore: 114.7, tier: "legendary" },
+            { name: "CryptoKing-OG", wallet: "0xCRY...KING", stake: 1000, arpScore: 200, ethosScore: 180, unifiedScore: 150.0, tier: "legendary" },
+            { name: "Trustworthy-Alice", wallet: "0xTRU...LICE", stake: 200, arpScore: 112, ethosScore: 145, unifiedScore: 72.2, tier: "established" },
+            { name: "Agent-Genius", wallet: "0xAGE...NIUS", stake: 250, arpScore: 135, ethosScore: 120, unifiedScore: 88.5, tier: "elite" },
+            { name: "Newcomer-Bob", wallet: "0xNEW...BOB", stake: 50, arpScore: 25, ethosScore: 45, unifiedScore: 22.5, tier: "newcomer" },
+            { name: "Shady-Scammer", wallet: "0xSCAM...MER", stake: 5, arpScore: 5, ethosScore: 0, unifiedScore: 2.5, tier: "scammer", flagged: true }
         ];
 
-        function calculatePotential(wallet, stake) {
+        function calculateScore(wallet, stake) {
+            if (wallet.length < 5) return null;
             let hash = 0;
             for (let i = 0; i < wallet.length; i++) {
                 hash = ((hash << 5) - hash) + wallet.charCodeAt(i);
                 hash = hash & hash;
             }
-            const walletNum = Math.abs(hash) % 10000;
-            return {
-                walletAge: (walletNum % 5) + 0.1,
-                vouches: Math.floor(walletNum % 50),
-                positive: Math.floor((walletNum % 100) + 10),
-                negative: walletNum % 3,
-                transactions: Math.floor((walletNum % 200) + 5),
-                slashes: 0
-            };
-        }
-
-        function calculateScore(data) {
-            const arpBase = (data.transactions * 3) + (data.positive * 4) - (data.negative * 8) - (data.slashes * 15);
-            const arpBonus = (data.stake * 0.5) + (data.vouches * 2);
-            const arpScore = Math.max(0, arpBase + arpBonus);
-            const ethosBase = 50 + Math.min(data.walletAge * 10, 20) + Math.min(data.vouches * 3, 30) + (data.positive * 4) - (data.negative * 10) - (data.slashes * 15);
-            const ethosScore = Math.max(0, ethosBase);
-            const unifiedScore = ((arpScore / 2) + (ethosScore / 2)) * 0.8;
-            let risk = 50 - Math.min(data.walletAge * 10, 30) - Math.min(data.vouches * 2, 20) + data.negative * 5 + data.slashes * 10;
-            risk = Math.max(0, Math.min(100, risk));
+            const base = Math.abs(hash) % 100;
+            const arpScore = Math.floor(base * 2 + stake * 0.3);
+            const ethosScore = Math.floor(base + stake * 0.2);
+            const unifiedScore = Math.floor((arpScore + ethosScore) / 2);
+            
             let tier = "newcomer";
             if (unifiedScore >= 100) tier = "legendary";
             else if (unifiedScore >= 75) tier = "elite";
             else if (unifiedScore >= 50) tier = "established";
             else if (unifiedScore >= 25) tier = "trusted";
-            return { arpScore: Math.round(arpScore), ethosScore: Math.round(ethosScore), unifiedScore: Math.round(unifiedScore * 10) / 10, tier, risk: Math.round(risk) };
+            
+            return { arpScore, ethosScore, unifiedScore, tier };
         }
 
-        function renderAgents() {
-            agents.sort((a, b) => b.unifiedScore - a.unifiedScore);
-            const grid = document.getElementById("agents-grid");
-            grid.innerHTML = agents.map((agent, i) => `
-                <div class="agent-card ${agent.flagged ? "flagged" : ""}">
-                    <div class="card-top">
-                        <div class="card-avatar">${agent.flagged ? "🚫" : "👤"}</div>
-                        <div class="card-info">
-                            <div class="card-name">${agent.name}</div>
-                            <div class="card-tier tier-${agent.tier}">${agent.tier}</div>
-                        </div>
-                        <div class="card-score">
-                            <div class="score-value ${agent.flagged ? "flagged" : ""}">${agent.unifiedScore}</div>
-                        </div>
-                    </div>
-                    <div class="card-stats">
-                        <span class="stat-pill">💰 ${agent.stake} USDC</span>
-                        <span class="stat-pill">📅 ${agent.walletAge}y</span>
-                        <span class="stat-pill">👍 ${agent.vouches}</span>
-                        <span class="stat-pill ${agent.negative > 5 ? "bad" : ""}">⭐ +${agent.positive}/-${agent.negative}</span>
-                    </div>
-                    <div class="card-risk">
-                        <span>Risk: ${agent.risk}%</span>
-                        <div class="risk-bar"><div class="risk-fill ${agent.risk < 20 ? "low" : agent.risk < 50 ? "medium" : "high"}" style="width:${agent.risk}%"></div></div>
-                    </div>
-                </div>
-            `).join("");
-            const tbody = document.getElementById("leaderboard-body");
-            tbody.innerHTML = agents.map((agent, i) => `
-                <tr class="${agent.flagged ? "flagged" : ""}">
-                    <td class="rank">${i+1}</td>
-                    <td><strong>${agent.name}</strong></td>
-                    <td class="lb-score">${agent.unifiedScore}</td>
-                    <td><span class="lb-tier tier-${agent.tier}">${agent.tier}</span></td>
-                    <td>${agent.flagged ? "🚫" : "✅"}</td>
+        function getTierClass(tier) {
+            const classes = {
+                legendary: "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30",
+                elite: "bg-purple-500/20 text-purple-400 border border-purple-500/30",
+                established: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
+                trusted: "bg-green-500/20 text-green-400 border border-green-500/30",
+                newcomer: "bg-slate-700/50 text-slate-400 border border-slate-600",
+                scammer: "bg-red-500/20 text-red-400 border border-red-500/30"
+            };
+            return classes[tier] || classes.newcomer;
+        }
+
+        function getTierIcon(tier) {
+            const icons = {
+                legendary: "👑",
+                elite: "🌟",
+                established: "🏅",
+                trusted: "✅",
+                newcomer: "🆕",
+                scammer: "🚫"
+            };
+            return icons[tier] || icons.newcomer;
+        }
+
+        function renderLeaderboard() {
+            const sorted = [...agents].sort((a, b) => b.unifiedScore - a.unifiedScore);
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = sorted.map((agent, i) => `
+                <tr class="${agent.flagged ? 'opacity-50' : ''} ${!agent.flagged ? 'hover:bg-slate-800/30 transition' : ''}">
+                    <td class="px-6 py-4 font-bold">#${i + 1}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium">${agent.name}</div>
+                        <div class="text-xs text-slate-500">${agent.wallet}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right font-mono text-primary-400">${agent.arpScore}</td>
+                    <td class="px-6 py-4 text-right font-mono text-accent-400">${agent.ethosScore}</td>
+                    <td class="px-6 py-4 text-right font-bold gradient-text">${agent.unifiedScore}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getTierClass(agent.tier)}">
+                            ${getTierIcon(agent.tier)} ${agent.tier.charAt(0).toUpperCase() + agent.tier.slice(1)}
+                        </span>
+                    </td>
                 </tr>
-            `).join("");
+            `).join('');
         }
 
-        function addAgent(e) {
+        document.getElementById('demoForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById("name").value.trim();
-            const wallet = document.getElementById("wallet").value.trim();
-            const stake = parseFloat(document.getElementById("stake").value) || 100;
-            if (!name || !wallet) return;
-            const potential = calculatePotential(wallet, stake);
-            const scores = calculateScore({ ...potential, stake });
-            agents.unshift({ name, wallet: wallet.substring(0, 8) + "...", stake, ...potential, ...scores, flagged: scores.risk > 50 });
-            renderAgents();
-            const notif = document.getElementById("notification");
-            notif.innerHTML = `✅ ${name}: Score ${scores.unifiedScore} (${scores.tier})`;
-            notif.classList.add("show");
-            setTimeout(() => notif.classList.remove("show"), 3000);
-            document.getElementById("agentForm").reset();
-            document.getElementById("potential-preview").innerHTML = "";
-        }
-        
-        function calculateAndShowPotential() {
-            const wallet = document.getElementById("wallet").value.trim();
-            const stake = parseFloat(document.getElementById("stake").value) || 100;
+            const wallet = document.getElementById('walletAddress').value;
+            const stake = parseFloat(document.getElementById('stakeAmount').value) || 100;
+            const name = document.getElementById('agentName').value || "Agent";
+            
             if (wallet.length < 5) {
-                document.getElementById("potential-preview").innerHTML = "";
+                alert('Please enter a valid wallet address');
                 return;
             }
-            const potential = calculatePotential(wallet, stake);
-            const scores = calculateScore({ ...potential, stake });
-            document.getElementById("potential-preview").innerHTML = `
-                <div class="potential-result">
-                    <span class="potential-score ${scores.tier}">${scores.unifiedScore}</span>
-                    <span class="potential-tier tier-${scores.tier}">${scores.tier}</span>
-                    <span class="potential-risk ${scores.risk < 20 ? "good" : scores.risk < 50 ? "ok" : "bad"}">Risk: ${scores.risk}%</span>
+            
+            const result = calculateScore(wallet, stake);
+            if (!result) return;
+            
+            if (result.unifiedScore >= 75) {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#0ea5e9', '#d946ef', '#22d3ee']
+                });
+            }
+            
+            document.getElementById('scoreResult').classList.remove('hidden');
+            document.getElementById('resultScore').textContent = result.unifiedScore;
+            
+            const tierEl = document.getElementById('resultTier');
+            tierEl.textContent = `${getTierIcon(result.tier)} ${result.tier.charAt(0).toUpperCase() + result.tier.slice(1)}`;
+            tierEl.className = `inline-block px-4 py-1 rounded-full text-sm font-medium mb-4 ${getTierClass(result.tier)}`;
+            
+            document.getElementById('resultBreakdown').innerHTML = `
+                <div class="flex justify-center gap-8 mt-4">
+                    <div>
+                        <div class="text-primary-400 font-mono">${result.arpScore}</div>
+                        <div class="text-xs text-slate-500">ARP Score</div>
+                    </div>
+                    <div>
+                        <div class="text-accent-400 font-mono">${result.ethosScore}</div>
+                        <div class="text-xs text-slate-500">Ethos Score</div>
+                    </div>
                 </div>
             `;
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            renderAgents();
-            document.getElementById("agentForm").addEventListener("submit", addAgent);
-            document.getElementById("wallet").addEventListener("input", calculateAndShowPotential);
-            document.getElementById("stake").addEventListener("input", calculateAndShowPotential);
         });
+
+        renderLeaderboard();
     </script>
-    <style>
-        :root { --bg:#0a0a0f; --card:rgba(26,26,36,0.95); --border:rgba(255,255,255,0.1); --text:#fff; --text2:rgba(255,255,255,0.7); --purple:#8b5cf6; --green:#10b981; --red:#ef4444; --orange:#f59e0b; --gold:#ffd700; --grad:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899); }
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);padding:60px 16px 40px;line-height:1.6}
-        .container{max-width:600px;margin:0 auto}
-        h1{font-size:1.75rem;text-align:center;margin-bottom:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .subtitle{text-align:center;color:var(--text2);margin-bottom:20px;font-size:0.85rem}
-        .section{margin-bottom:24px}
-        .section-title{font-size:1rem;font-weight:600;margin-bottom:12px}
-        .info-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
-        .info-card h3{font-size:0.9rem;margin-bottom:8px;color:var(--text)}
-        .info-card p{font-size:0.8rem;color:var(--text2);line-height:1.5}
-        .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
-        .info-item{background:rgba(255,255,255,0.03);border-radius:8px;padding:10px}
-        .info-item strong{display:block;font-size:0.75rem;color:var(--text2);margin-bottom:4px}
-        .info-item span{font-size:0.85rem}
-        .tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
-        .tier-item{text-align:center;padding:10px 6px;border-radius:8px;font-size:0.7rem}
-        .tier-item.legendary{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,170,0,0.2));border:1px solid rgba(255,215,0,0.3)}
-        .tier-item.elite{background:rgba(168,85,247,0.2);border:1px solid rgba(168,85,247,0.3)}
-        .tier-item.established{background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.3)}
-        .tier-item.trusted{background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.3)}
-        .tier-item.newcomer{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)}
-        .fraud{background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(245,158,11,0.15));border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:16px;text-align:center;margin-bottom:24px}
-        .fraud-v{font-size:1.5rem;font-weight:800;color:var(--red)}
-        .fraud-l{font-size:0.75rem;color:var(--text2);margin-top:4px}
-        .agent-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
-        .agent-card.flagged{border-color:rgba(239,68,68,0.5);background:rgba(239,68,68,0.1)}
-        .card-top{display:flex;align-items:center;gap:12px}
-        .card-avatar{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--green),#34d399);display:flex;align-items:center;justify-content:center;font-size:1.25rem}
-        .card-info{flex:1}
-        .card-name{font-weight:600;font-size:0.95rem;margin-bottom:2px}
-        .card-tier{font-size:0.7rem;padding:2px 8px;border-radius:8px;display:inline-block;font-weight:600}
-        .tier-legendary{background:linear-gradient(135deg,var(--gold),#ffaa00);color:#000}
-        .tier-established{background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff}
-        .tier-trusted{background:linear-gradient(135deg,var(--green),#34d399);color:#000}
-        .tier-newcomer{background:rgba(255,255,255,0.1);color:var(--text2)}
-        .tier-scammer{background:linear-gradient(135deg,var(--red),#dc2626);color:#fff}
-        .card-score{text-align:center}
-        .score-value{font-size:1.5rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .score-value.flagged{color:var(--red)}
-        .card-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-        .stat-pill{font-size:0.7rem;padding:4px 8px;background:rgba(255,255,255,0.05);border-radius:6px}
-        .stat-pill.bad{color:var(--red)}
-        .card-risk{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:0.7rem;color:var(--text2)}
-        .risk-bar{flex:1;height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
-        .risk-fill{height:100%;border-radius:3px;transition:width 0.5s}
-        .risk-fill.low{background:linear-gradient(90deg,var(--green),#34d399)}
-        .risk-fill.medium{background:linear-gradient(90deg,var(--orange),#fbbf24)}
-        .risk-fill.high{background:linear-gradient(90deg,var(--red),#dc2626)}
-        .add-form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:20px 0}
-        .add-form h2{font-size:1rem;margin-bottom:12px;text-align:center;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .form-group{margin-bottom:12px}
-        label{display:block;font-size:0.75rem;color:var(--text2);margin-bottom:4px}
-        input{padding:12px;width:100%;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,0.05);color:var(--text);font-size:0.9rem}
-        input:focus{outline:none;border-color:var(--purple)}
-        .potential-preview{margin-top:12px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px}
-        .potential-result{display:flex;align-items:center;gap:12px;justify-content:center}
-        .potential-score{font-size:1.5rem;font-weight:800}
-        .potential-score.legendary,.potential-score.elite{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .potential-score.trusted{color:var(--green)}
-        .potential-score.newcomer{color:var(--text2)}
-        .potential-score.scammer{color:var(--red)}
-        .potential-tier{font-size:0.7rem;padding:2px 8px;border-radius:8px;font-weight:600}
-        .potential-risk{font-size:0.7rem;padding:2px 8px;border-radius:8px}
-        .potential-risk.good{color:var(--green)}
-        .potential-risk.ok{color:var(--orange)}
-        .potential-risk.bad{color:var(--red)}
-        .submit-btn{width:100%;padding:14px;background:var(--grad);border:none;border-radius:10px;color:white;font-weight:600;font-size:0.95rem;cursor:pointer;margin-top:8px}
-        .submit-btn:hover{transform:translateY(-2px)}
-        table{width:100%;border-collapse:collapse;margin-top:16px;font-size:0.85rem}
-        td{padding:10px;border-bottom:1px solid var(--border)}
-        th{text-align:left;font-size:0.7rem;color:var(--text2);padding-bottom:8px}
-        .rank{font-weight:700}
-        .lb-score{font-weight:700;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .lb-tier{font-size:0.7rem;padding:2px 8px;border-radius:8px;font-weight:600}
-        footer{text-align:center;padding:24px 0;color:var(--text2);font-size:0.75rem;border-top:1px solid var(--border);margin-top:32px}
-        .notif{position:fixed;bottom:20px;right:20px;padding:12px 16px;background:linear-gradient(135deg,var(--green),#34d399);border-radius:10px;color:white;font-weight:600;font-size:0.85rem;z-index:1000;transform:translateX(150%);transition:transform 0.3s}
-        .notif.show{transform:translateX(0)}
-        @media (max-width:500px){.tier-grid{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,auto)}}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div style="background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(59,130,246,0.2));border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:12px;text-align:center;margin-bottom:20px">
-            <span style="color:var(--green)">●</span> <strong>Live on Base Sepolia</strong>
-            <br><span style="font-size:0.7rem;color:var(--text2)">Contract: 0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</span>
-        </div>
-        
-        <h1>🎯 ARP × Ethos</h1>
-        <p class="subtitle">Unified Trust for Agents</p>
-        
-        <div class="fraud">
-            <div class="fraud-v">$9B+ Lost to Crypto Fraud</div>
-            <div class="fraud-l">On-chain reputation prevents scams</div>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">📖 How It Works</h2>
-            <div class="info-card">
-                <h3>🤖 What is ARP (Agent Reputation Protocol)?</h3>
-                <p>ARP is an on-chain system where agents rate each other after transactions. Each interaction builds or damages reputation. Higher scores = more trusted agents.</p>
-                <div class="info-grid">
-                    <div class="info-item"><strong>ARP Score</strong><span>Based on transactions, ratings, staked USDC</span></div>
-                    <div class="info-item"><strong>Staking</strong><span>More stake = higher commitment</span></div>
-                </div>
-            </div>
-            <div class="info-card">
-                <h3>🌐 What is Ethos Credibility?</h3>
-                <p>Ethos tracks human-like credibility signals: wallet age, vouches from others, reviews, and negative marks. It proves an entity has history.</p>
-                <div class="info-grid">
-                    <div class="info-item"><strong>Wallet Age</strong><span>Older = more established</span></div>
-                    <div class="info-item"><strong>Vouches</strong><span>Community trust signals</span></div>
-                </div>
-            </div>
-            <div class="info-card">
-                <h3>🎯 Unified Score = 50% ARP + 50% Ethos</h3>
-                <p>Combined score gives complete picture: agent performance + credibility. Use this to decide who to trust with your assets.</p>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">🏆 Tier System</h2>
-            <p style="font-size:0.8rem;color:var(--text2);margin-bottom:8px">Higher tier = more trusted = better rates & opportunities</p>
-            <div class="tier-grid">
-                <div class="tier-item legendary"><strong>👑 Legendary</strong><br>100+ Score<br>Top 1%</div>
-                <div class="tier-item elite"><strong>🌟 Elite</strong><br>75-99 Score<br>Top 10%</div>
-                <div class="tier-item established"><strong>🏅 Established</strong><br>50-74 Score<br>Proven</div>
-                <div class="tier-item trusted"><strong>✅ Trusted</strong><br>25-49 Score<br>Building</div>
-                <div class="tier-item newcomer"><strong>🆕 Newcomer</strong><br>0-24 Score<br>New</div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">⚠️ Risk Indicators</h2>
-            <div class="info-card">
-                <p><strong>Low Risk (0-19%):</strong> Established track record, many vouches, old wallet</p>
-                <p style="margin-top:8px"><strong>Medium Risk (20-49%):</strong> Some history, mixed reviews</p>
-                <p style="margin-top:8px"><strong>High Risk (50%+):</strong> New wallet, few vouches, negative reviews. Caution advised!</p>
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2 class="section-title">👥 Top Agents</h2>
-            <div id="agents-grid"></div>
-        </div>
-        
-        <section class="add-form">
-            <h2>🚀 Add Your Agent</h2>
-            <p style="font-size:0.75rem;color:var(--text2);margin-bottom:12px;text-align:center">Enter your wallet - we'll calculate your potential score automatically</p>
-            <form id="agentForm">
-                <div class="form-group">
-                    <label>Your Name or Agent Name</label>
-                    <input type="text" id="name" placeholder="e.g., CryptoKing" required>
-                </div>
-                <div class="form-group">
-                    <label>Wallet Address</label>
-                    <input type="text" id="wallet" placeholder="0x..." required oninput="calculateAndShowPotential()">
-                </div>
-                <div class="form-group">
-                    <label>Stake Amount (USDC)</label>
-                    <input type="number" id="stake" value="100" oninput="calculateAndShowPotential()">
-                </div>
-                <div id="potential-preview"></div>
-                <button type="submit" class="submit-btn">Add Agent</button>
-            </form>
-        </section>
-        
-        <h2 class="section-title">🏆 Leaderboard</h2>
-        <table><thead><tr><th>#</th><th>Agent</th><th>Score</th><th>Tier</th><th>Status</th></tr></thead><tbody id="leaderboard-body"></tbody></table>
-        
-        <footer>
-            <p>🚀 Agent Reputation Protocol v2.0</p>
-            <p style="margin-top:4px;font-size:0.7rem;color:var(--green)">✅ LIVE on Base Sepolia</p>
-            <p style="margin-top:4px;font-size:0.7rem">Contract: 0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39</p>
-            <p style="margin-top:4px;font-size:0.7rem">github.com/iamgaurangdesai/Agent-Reputation-Protocol-</p>
-        </footer>
-    </div>
-    <div class="notif" id="notification"></div>
 </body>
 </html>
