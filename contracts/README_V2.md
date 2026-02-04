@@ -37,7 +37,7 @@
 
 | Network | USDC Address | ARP V2 Address |
 |---------|-------------|----------------|
-| Base Sepolia | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | `DEPLOY_YOURS` |
+| Base Sepolia | `0x036CbD53842c5426634e7929541eC2318f3dCF7e` | `0xe56EB6Cf2DC0eE8DcE1DdDeCD0ea1840d7Ec3d4c` |
 | Base Mainnet | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` | `DEPLOY_YOURS` |
 
 ### Key Changes from V1
