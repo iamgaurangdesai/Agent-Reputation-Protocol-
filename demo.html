@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARP Console | Agent Reputation Protocol</title>
-    <!-- Privy React SDK -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@privy-io/react-auth@1.63.0/dist/index.umd.js"></script>
-    <!-- Ethers.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <!-- Ethers.js - Load first and reliably with cache buster -->
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js?v=2"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -538,19 +534,22 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Page loaded, checking for ethers...');
+            
             // Wait for ethers to load
             let retries = 0;
-            while (typeof ethers === 'undefined' && retries < 10) {
-                await new Promise(resolve => setTimeout(resolve, 500));
+            while (typeof ethers === 'undefined' && retries < 20) {
+                await new Promise(resolve => setTimeout(resolve, 300));
                 retries++;
             }
             
             if (typeof ethers === 'undefined') {
-                console.error('Ethers.js failed to load');
-                showStatus('Failed to load Web3 library. Please refresh the page.', 'error');
+                console.error('Ethers.js failed to load after retries');
+                showStatus('❌ Web3 library failed to load. Please hard refresh: Ctrl+Shift+R (or Cmd+Shift+R on Mac)', 'error');
                 return;
             }
             
+            console.log('✅ Ethers.js loaded successfully');
             loadLeaderboard();
             
             // Check if wallet was previously connected
@@ -562,16 +561,15 @@
         // Connect Wallet
         async function connectWallet() {
             try {
-                // Check if ethers is loaded
-                if (typeof ethers === 'undefined') {
-                    showStatus('Loading Web3 library... please wait a moment and try again', 'info');
-                    // Try to reload the page if ethers isn't loaded
-                    setTimeout(() => location.reload(), 2000);
+                console.log('Connecting wallet...');
+                
+                if (typeof window.ethereum === 'undefined') {
+                    alert('Please install MetaMask: https://metamask.io/download');
                     return;
                 }
                 
-                if (typeof window.ethereum === 'undefined') {
-                    showStatus('Please install MetaMask: https://metamask.io/download', 'error');
+                if (typeof ethers === 'undefined') {
+                    showStatus('❌ Web3 library not loaded. Hard refresh the page: Ctrl+Shift+R', 'error');
                     return;
                 }
 
@@ -582,6 +580,8 @@
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
                 contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                
+                console.log('✅ Wallet connected:', userAddress);
 
                 // Update UI
                 document.getElementById('walletSection').innerHTML = `
