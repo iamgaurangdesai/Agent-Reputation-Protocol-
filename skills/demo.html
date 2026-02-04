@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARP - Agent Reputation Protocol Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 10px; font-size: 2.5em; }
+        .subtitle { text-align: center; color: #8892b0; margin-bottom: 30px; }
+        .tagline { text-align: center; color: #64ffda; font-size: 1.2em; margin-bottom: 30px; }
+        
+        .agents-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .agent-card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.3s; }
+        .agent-card:hover { transform: translateY(-5px); border-color: #64ffda; }
+        .agent-name { font-size: 1.3em; font-weight: bold; margin-bottom: 10px; }
+        .agent-stats { color: #8892b0; font-size: 0.9em; }
+        .agent-stats div { margin: 5px 0; }
+        .tier { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+        .tier-newcomer { background: #4a5568; }
+        .tier-trusted { background: #48bb78; }
+        .tier-elite { background: #9f7aea; }
+        .tier-legendary { background: #f6e05e; color: #1a1a2e; }
+        .score { font-size: 2em; font-weight: bold; color: #64ffda; }
+        
+        .actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .action-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 15px 20px; border-radius: 8px; cursor: pointer; font-size: 1em; transition: transform 0.2s, box-shadow 0.2s; }
+        .action-btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); }
+        .action-btn:active { transform: scale(0.95); }
+        
+        .log { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; max-height: 300px; overflow-y: auto; }
+        .log-entry { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); animation: fadeIn 0.3s; }
+        .log-entry:last-child { border-bottom: none; }
+        .log-time { color: #64ffda; font-size: 0.8em; }
+        .log-msg { margin-top: 5px; }
+        .log-good { color: #48bb78; }
+        .log-bad { color: #fc8181; }
+        .log-info { color: #90cdf4; }
+        
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin: 30px 0; }
+        .feature { text-align: center; padding: 15px; background: rgba(100, 255, 218, 0.1); border-radius: 8px; }
+        .feature-icon { font-size: 2em; margin-bottom: 10px; }
+        .feature-name { font-weight: bold; color: #64ffda; }
+        
+        .leaderboard { margin-top: 30px; }
+        .leaderboard h2 { margin-bottom: 20px; text-align: center; }
+        .lb-entry { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.05); margin-bottom: 10px; border-radius: 8px; }
+        .lb-rank { font-size: 1.5em; font-weight: bold; width: 50px; }
+        .lb-name { flex: 1; }
+        .lb-score { font-size: 1.5em; font-weight: bold; color: #64ffda; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .pulse { animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Agent Reputation Protocol</h1>
+        <p class="subtitle">First On-Chain Reputation System for AI Agents</p>
+        <p class="tagline">"Trust, but verify. On-chain."</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-name">Delegated Staking</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔮</div>
+                <div class="feature-name">Reputation Oracles</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-name">Prediction Markets</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-name">Reputation NFTs</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚖️</div>
+                <div class="feature-name">Slash Councils</div>
+            </div>
+        </div>
+        
+        <div class="agents-grid" id="agentsGrid"></div>
+        
+        <div class="actions">
+            <button class="action-btn" onclick="runDemo()">🚀 Run Full Demo</button>
+            <button class="action-btn" onclick="resetDemo()">🔄 Reset Demo</button>
+            <button class="action-btn" onclick="registerAgent()">➕ Register Agent</button>
+            <button class="action-btn" onclick="makeTransaction()">💸 Make Transaction</button>
+            <button class="action-btn" onclick="slashBadActor()">⚖️ Slash Bad Actor</button>
+        </div>
+        
+        <div class="leaderboard">
+            <h2>🏆 Leaderboard</h2>
+            <div id="leaderboard"></div>
+        </div>
+        
+        <div class="log">
+            <div id="log"></div>
+        </div>
+    </div>
+    
+    <script>
+        let agents = [];
+        let agentId = 0;
+        let logEntries = [];
+        
+        function init() {
+            agents = [
+                { id: 0, name: 'Genie-Commerce', stake: 50, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false },
+                { id: 1, name: 'TraderBot-X', stake: 25, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false },
+                { id: 2, name: 'PaymentAgent-7', stake: 100, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false },
+                { id: 3, name: 'ShadyBot-99', stake: 10, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: true }
+            ];
+            agentId = 4;
+            updateAll();
+            log('🚀 Agent Reputation Protocol initialized', 'info');
+        }
+        
+        function calculateScore(agent) {
+            if (agent.ratings.length === 0) return 0;
+            const avgRating = agent.ratings.reduce((a, b) => a + b, 0) / agent.ratings.length;
+            const stakeBonus = (agent.stake + agent.delegated) * 0.1;
+            const txBonus = agent.txCount * 2;
+            return Math.round((avgRating * 20) + stakeBonus + txBonus);
+        }
+        
+        function getTier(score) {
+            if (score >= 200) return { name: 'LEGENDARY', class: 'tier-legendary' };
+            if (score >= 100) return { name: 'ELITE', class: 'tier-elite' };
+            if (score >= 30) return { name: 'TRUSTED', class: 'tier-trusted' };
+            return { name: 'NEWCOMER', class: 'tier-newcomer' };
+        }
+        
+        function updateAll() {
+            renderAgents();
+            renderLeaderboard();
+        }
+        
+        function renderAgents() {
+            const grid = document.getElementById('agentsGrid');
+            grid.innerHTML = agents.map(agent => {
+                const tier = getTier(agent.score);
+                return `
+                    <div class="agent-card">
+                        <div class="agent-name">${agent.name}</div>
+                        <span class="tier ${tier.class}">${tier.name}</span>
+                        <div class="agent-stats" style="margin-top: 15px;">
+                            <div>💰 Stake: ${agent.stake} USDC</div>
+                            <div>📊 Delegated: ${agent.delegated} USDC</div>
+                            <div>📝 Transactions: ${agent.txCount}</div>
+                            <div>⭐ Ratings: ${agent.ratings.length}</div>
+                        </div>
+                        <div class="score">${agent.score}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderLeaderboard() {
+            const sorted = [...agents].sort((a, b) => b.score - a.score);
+            const lb = document.getElementById('leaderboard');
+            lb.innerHTML = sorted.map((agent, i) => `
+                <div class="lb-entry">
+                    <div class="lb-rank">${i + 1}</div>
+                    <div class="lb-name">${agent.name}</div>
+                    <div class="lb-score">${agent.score}</div>
+                </div>
+            `).join('');
+        }
+        
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            logEntries.unshift({ time, msg, type });
+            if (logEntries.length > 50) logEntries.pop();
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = logEntries.map(e => `
+                <div class="log-entry">
+                    <div class="log-time">${e.time}</div>
+                    <div class="log-msg ${e.type === 'good' ? 'log-good' : e.type === 'bad' ? 'log-bad' : 'log-info'}">${e.msg}</div>
+                </div>
+            `).join('');
+        }
+        
+        function runDemo() {
+            log('🎬 Running full demo...', 'info');
+            
+            setTimeout(() => {
+                const genie = agents[0];
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        genie.txCount++;
+                        genie.ratings.push(5);
+                        genie.score = calculateScore(genie);
+                        log(`✅ Genie-Commerce transaction #${i + 1}: 5 stars! Rep: ${genie.score}`, 'good');
+                        updateAll();
+                    }, i * 800);
+                }
+            }, 500);
+            
+            setTimeout(() => {
+                const shady = agents[3];
+                shady.txCount += 2;
+                shady.ratings.push(1, 1);
+                shady.score = calculateScore(shady) - 15;
+                log(`⚠️ ShadyBot-99 failed 2 transactions! Flagged!`, 'bad');
+                log(`⚖️ Slashed 50%: ${shady.stake / 2} USDC lost`, 'bad');
+                shady.stake = Math.round(shady.stake / 2);
+                updateAll();
+            }, 3000);
+            
+            setTimeout(() => {
+                const genie = agents[0];
+                const newBot = { id: agentId++, name: `NewBot-${agentId}`, stake: 10, delegated: 50, txCount: 1, ratings: [5], score: calculateScore({...newBot, ratings: [5], txCount: 1}), tier: 'NEWCOMER', isBad: false };
+                newBot.score = calculateScore(newBot);
+                agents.push(newBot);
+                log(`📦 NewBot-${agentId - 1} joined (50 USDC delegated by Genie)`, 'info');
+                log(`🚀 Reputation boosted by trusted connection! Score: ${newBot.score}`, 'good');
+                updateAll();
+            }, 4500);
+        }
+        
+        function resetDemo() {
+            init();
+            log('🔄 Demo reset', 'info');
+        }
+        
+        function registerAgent() {
+            const names = ['Alice-Bot', 'Bob-AI', 'Carol-Agent', 'Dave-TRADER'];
+            const name = names[Math.floor(Math.random() * names.length)] || `Agent-${agentId}`;
+            const agent = { id: agentId++, name, stake: Math.round(Math.random() * 100) + 10, delegated: 0, txCount: 0, ratings: [], score: 0, tier: 'NEWCOMER', isBad: false };
+            agents.push(agent);
+            log(`➕ Registered: ${name} with ${agent.stake} USDC stake`, 'info');
+            updateAll();
+        }
+        
+        function makeTransaction() {
+            const from = agents[Math.floor(Math.random() * agents.length)];
+            const to = agents[Math.floor(Math.random() * agents.length)];
+            if (from.id === to.id) {
+                log('⚠️ Cannot transact with self', 'info');
+                return;
+            }
+            from.txCount++;
+            const rating = Math.floor(Math.random() * 3) + 3; // 3-5 stars
+            from.ratings.push(rating);
+            from.score = calculateScore(from);
+            log(`💸 ${from.name} → ${to.name} | Rating: ${rating}⭐ | Rep: ${from.score}`, 'good');
+            updateAll();
+        }
+        
+        function slashBadActor() {
+            const badAgents = agents.filter(a => a.isBad || a.ratings.filter(r => r === 1).length >= 2);
+            if (badAgents.length === 0) {
+                log('⚠️ No bad actors found', 'info');
+                return;
+            }
+            const agent = badAgents[0];
+            const slashed = Math.round(agent.stake * 0.5);
+            agent.stake -= slashed;
+            agent.ratings.push(1);
+            agent.score = calculateScore(agent) - 15;
+            log(`⚖️ ${agent.name} SLASHED! Lost ${slashed} USDC`, 'bad');
+            updateAll();
+        }
+        
+        init();
+    </script>
+</body>
+</html>
