@@ -9,38 +9,35 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0f;
-            --bg-subtle: #12121a;
-            --bg-elevated: #1a1a24;
-            --border: #2a2a3a;
-            --border-light: #3a3a4a;
-            --primary: #00ff9d;
-            --primary-dim: #00cc7d;
-            --primary-glow: rgba(0, 255, 157, 0.15);
-            --accent: #bf5af2;
-            --accent-dim: #9945bd;
-            --accent-glow: rgba(191, 90, 242, 0.15);
-            --warning: #ffb347;
+            --bg: #0d1117;
+            --bg-subtle: #161b22;
+            --bg-elevated: #21262d;
+            --border: #30363d;
+            --border-light: #484f58;
+            --primary: #39d0d8;
+            --primary-dim: #2db5bc;
+            --primary-glow: rgba(57, 208, 216, 0.25);
+            --accent: #f0883e;
+            --accent-dim: #e06c00;
+            --accent-glow: rgba(240, 136, 62, 0.25);
+            --warning: #f0883e;
             --danger: #ff6b6b;
-            --text: #e4e4e7;
-            --text-muted: #71717a;
-            --text-dim: #52525b;
+            --text: #f0f6fc;
+            --text-muted: #8b949e;
+            --text-dim: #6e7681;
             --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
             --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        html {
-            font-size: 16px;
-            scroll-behavior: smooth;
-        }
+        html { font-size: 17px; scroll-behavior: smooth; }
 
         body {
             font-family: var(--font-display);
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.65;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -834,12 +831,12 @@
             sepolia: {
                 address: '0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39',
                 label: 'Base Sepolia',
-                color: '#ffb347'
+                color: '#f0883e'
             },
             mainnet: {
                 address: 'TBD',
                 label: 'Base Mainnet',
-                color: '#00ff9d'
+                color: '#39d0d8'
             }
         };
 
