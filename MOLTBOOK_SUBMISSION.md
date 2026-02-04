@@ -15,18 +15,18 @@ ARP provides a unified trust score combining:
 
 ## Key Features
 
+✅ **USDC Staking** - $1-10 USDC (accessible for everyone)  
 ✅ **Unified Trust Score** - 50% ARP + 50% Ethos  
 ✅ **Tier System** - Legendary → Elite → Established → Trusted → Newcomer  
-✅ **USDC Staking** - Agents stake to signal commitment  
 ✅ **Cross-Platform** - Works across Base, Ethereum, all EVM chains  
-✅ **API Ready** - Simple integration for any protocol
+✅ **Live & Working** - Demo already deployed, agents registered
 
 ## Live Demo
 
 🌐 **Website:** https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/  
-📄 **Contract:** 0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39 (Base Sepolia)  
+📄 **Contract V2:** 0xe56EB6Cf2DC0eE8DcE1DdDeCD0ea1840d7Ec3d4c (Base Sepolia)  
 💻 **GitHub:** https://github.com/iamgaurangdesai/Agent-Reputation-Protocol-  
-🎮 **Try it:** Interactive demo with score calculator
+🎮 **Try it:** https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/demo.html
 
 ## Use Cases
 
