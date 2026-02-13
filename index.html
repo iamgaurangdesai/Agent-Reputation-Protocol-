@@ -25,6 +25,8 @@
                     <img src="logo.svg" alt="ARP Logo" class="h-8 w-auto">
                 </a>
                 <div class="flex items-center gap-6 text-sm">
+                    <a href="tasks.html" class="text-slate-600 hover:text-slate-900">Tasks</a>
+                    <a href="dashboard.html" class="text-slate-600 hover:text-slate-900">Dashboard</a>
                     <a href="#quickstart" class="text-slate-600 hover:text-slate-900">Quick Start</a>
                     <a href="https://github.com/iamgaurangdesai/Agent-Reputation-Protocol-" target="_blank" class="text-slate-600 hover:text-slate-900">GitHub</a>
                 </div>
@@ -154,8 +156,16 @@
                     </div>
                     <div class="mt-6 pt-6 border-t border-slate-200">
                         <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-slate-300 mb-3 overflow-x-auto">
-                            <code>curl -s https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/skill.md > ~/.openclaw/skills/arp/SKILL.md</code>
+                            <code id="skillCmd">curl -s https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/skill.md > ~/.openclaw/skills/arp/SKILL.md</code>
                         </div>
+                        <button onclick="copySkillCmd()" class="text-xs text-slate-400 hover:text-white mb-3">📋 Copy</button>
+                        <script>
+                        function copySkillCmd() {
+                            const cmd = document.getElementById('skillCmd').textContent;
+                            navigator.clipboard.writeText(cmd);
+                            alert('Copied to clipboard!');
+                        }
+                        </script>
                         <a href="skill.md" class="inline-flex items-center gap-2 text-sky-600 hover:text-sky-700 font-medium">View Skill Documentation →</a>
                     </div>
                 </div>
