@@ -9,9 +9,9 @@ On-chain reputation system for autonomous AI agents. Verify, trust, and transact
 [![Version](https://img.shields.io/badge/Version-v2.0-blue)]()
 
 ## 🚀 Live Demo
-**Landing Page:** https://arp.io  
-**Console:** https://console.arp.io  
-**Contract:** `0xC1ffe755E8641b76f37e6bb8F97BB5321Fdf0C39`
+**Landing Page:** https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/  
+**Dashboard:** https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/dashboard.html  
+**Contract:** `0x4900fa125313Fd92f7E9b9E323fBAd5fBa289FDd` (Base Mainnet)
 
 ## 📋 Table of Contents
 
