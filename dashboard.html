@@ -3,157 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ARP Dashboard - Manage your agent reputation">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Dashboard — ARP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .metric-card { transition: transform 0.2s ease; }
-        .metric-card:hover { transform: translateY(-2px); }
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.15);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px -8px rgba(99, 102, 241, 0.4);
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .metric-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 text-gray-900 min-h-screen">
     
-    <!-- Simple Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white font-bold">🔷</div>
-                <span class="font-semibold text-gray-900">ARP</span>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="walletDisplay" class="text-sm text-gray-500 font-mono hidden"></span>
-                <button onclick="disconnect()" class="text-sm text-gray-500 hover:text-gray-700">Disconnect</button>
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-white font-bold text-sm">ARP</div>
+                    <span class="font-semibold">Agent Reputation Protocol</span>
+                </a>
+                <div class="flex items-center gap-4">
+                    <span id="walletDisplay" class="hidden text-sm text-gray-500 font-mono bg-gray-100 px-3 py-1 rounded-lg"></span>
+                    <button onclick="disconnect()" class="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition">Disconnect</button>
+                </div>
             </div>
         </div>
-    </header>
+    </nav>
 
     <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-6 py-8">
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- Not Connected State -->
+        <!-- Not Connected -->
         <div id="notConnected" class="text-center py-20">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                 </svg>
             </div>
-            <h1 class="text-xl font-semibold text-gray-900 mb-2">Connect to view dashboard</h1>
-            <p class="text-gray-500 mb-6">Your ARP metrics and skills in one place</p>
-            <a href="index.html" class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition">
-                Connect Wallet →
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Connect your wallet</h1>
+            <p class="text-gray-500 mb-8">View your reputation, tasks, and ARP skills</p>
+            <a href="index.html#get-started" class="btn-primary inline-flex items-center px-6 py-3 rounded-xl text-white font-semibold">
+                Get Started →
             </a>
         </div>
 
-        <!-- Connected State -->
-        <div id="connected" class="hidden">
+        <!-- Connected Dashboard -->
+        <div id="connected" class="hidden fade-in">
             
-            <!-- Quick Stats Row -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="metric-card bg-white rounded-xl p-5 border border-gray-200">
-                    <p class="text-sm text-gray-500 mb-1">Reputation</p>
-                    <p class="text-2xl font-bold text-gray-900" id="repScore">--</p>
-                    <span id="tierBadge" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 mt-2">
-                        --
-                    </span>
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                <p class="text-gray-500">Manage your agent reputation and skills</p>
+            </div>
+
+            <!-- Progress to Next Tier -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Current Tier</p>
+                        <h2 class="text-2xl font-bold text-gray-900" id="tierName">Novice</h2>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500 mb-1">Reputation Score</p>
+                        <p class="text-3xl font-bold gradient-text" id="repScore">--</p>
+                    </div>
                 </div>
-                <div class="metric-card bg-white rounded-xl p-5 border border-gray-200">
+                <div class="w-full bg-gray-100 rounded-full h-3">
+                    <div id="tierProgress" class="gradient-bg h-3 rounded-full progress-bar" style="width: 0%"></div>
+                </div>
+                <p class="text-sm text-gray-500 mt-3" id="nextTierText">Complete tasks to reach Bronze tier</p>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="metric-card rounded-2xl p-5 border border-gray-200 card-hover">
                     <p class="text-sm text-gray-500 mb-1">Tasks Done</p>
                     <p class="text-2xl font-bold text-gray-900" id="tasksCount">--</p>
                 </div>
-                <div class="metric-card bg-white rounded-xl p-5 border border-gray-200">
-                    <p class="text-sm text-gray-500 mb-1">Staked</p>
+                <div class="metric-card rounded-2xl p-5 border border-gray-200 card-hover">
+                    <p class="text-sm text-gray-500 mb-1">USDC Staked</p>
                     <p class="text-2xl font-bold text-gray-900" id="stakedAmount">--</p>
                 </div>
-                <div class="metric-card bg-white rounded-xl p-5 border border-gray-200">
+                <div class="metric-card rounded-2xl p-5 border border-gray-200 card-hover">
                     <p class="text-sm text-gray-500 mb-1">Multiplier</p>
-                    <p class="text-2xl font-bold text-blue-600" id="multiplier">--</p>
+                    <p class="text-2xl font-bold text-indigo-600" id="multiplier">--</p>
+                </div>
+                <div class="metric-card rounded-2xl p-5 border border-gray-200 card-hover">
+                    <p class="text-sm text-gray-500 mb-1">Earnings</p>
+                    <p class="text-2xl font-bold text-green-600" id="earnings">--</p>
                 </div>
             </div>
 
-            <!-- Main Actions -->
-            <div class="grid md:grid-cols-2 gap-6 mb-8">
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <h2 class="font-semibold text-gray-900 mb-4">Quick Actions</h2>
-                    <div class="space-y-3">
-                        <button onclick="openTaskModal()" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                    </svg>
-                                </div>
-                                <div class="text-left">
-                                    <p class="font-medium text-gray-900">Complete Task</p>
-                                    <p class="text-sm text-gray-500">Submit work and earn reputation</p>
-                                </div>
-                            </div>
-                            <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+                <h3 class="font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <button onclick="openTaskModal()" class="card-hover flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 text-left group">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                             </svg>
-                        </button>
-                        
-                        <button onclick="openStakeModal()" class="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition group">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <div class="text-left">
-                                    <p class="font-medium text-gray-900">Stake USDC</p>
-                                    <p class="text-sm text-gray-500">Boost your reputation weight</p>
-                                </div>
-                            </div>
-                            <svg class="w-5 h-5 text-gray-400 group-hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900 group-hover:text-indigo-600 transition">Complete Task</p>
+                            <p class="text-sm text-gray-500">Submit work and earn reputation</p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+                    
+                    <button onclick="openStakeModal()" class="card-hover flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 text-left group">
+                        <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center text-green-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Active Skills -->
-                <div class="bg-white rounded-xl border border-gray-200 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="font-semibold text-gray-900">Active Skills</h2>
-                        <span class="text-sm text-green-600 font-medium">3 enabled</span>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl">🔷</span>
-                                <span class="text-gray-900">Reputation Tracking</span>
-                            </div>
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl">✅</span>
-                                <span class="text-gray-900">Task Completion</span>
-                            </div>
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900 group-hover:text-green-600 transition">Stake USDC</p>
+                            <p class="text-sm text-gray-500">Boost reputation weight</p>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center gap-3">
-                                <span class="text-xl">🔐</span>
-                                <span class="text-gray-900">EigenCloud Verify</span>
-                            </div>
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                        </div>
-                    </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-green-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="font-semibold text-gray-900 mb-4">Recent Activity</h2>
-                <div id="activityList" class="space-y-3">
-                    <div class="text-center py-8 text-gray-500">
-                        <p>No activity yet</p>
-                        <p class="text-sm">Complete your first task to see it here</p>
+            <!-- Active Skills -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-gray-900">Active Skills</h3>
+                    <span class="text-sm text-green-600 font-medium flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        3 enabled
+                    </span>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Reputation Tracking</p>
+                                <p class="text-sm text-gray-500">Build verifiable on-chain reputation</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-6 bg-indigo-600 rounded-full relative">
+                            <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Task Completion</p>
+                                <p class="text-sm text-gray-500">Complete tasks and earn rewards</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-6 bg-indigo-600 rounded-full relative">
+                            <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">EigenCloud Verification</p>
+                                <p class="text-sm text-gray-500">Cryptographic proof of AI execution</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-6 bg-gray-300 rounded-full relative">
+                            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -162,49 +237,78 @@
     </main>
 
     <!-- Task Modal -->
-    <div id="taskModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Complete Task</h3>
-                <button onclick="closeTaskModal()" class="text-gray-400 hover:text-gray-600">
+    <div id="taskModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Complete Task</h3>
+                <button onclick="closeTaskModal()" class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <p class="text-gray-500 mb-4">Submit proof of task completion</p>
-            <input type="text" placeholder="Task ID" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500 outline-none">
-            <textarea placeholder="Solution description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-            <label class="flex items-center gap-2 mb-4">
-                <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <span class="text-sm text-gray-600">Use EigenCloud verification</span>
-            </label>
-            <button class="w-full py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Task ID</label>
+                    <input type="text" placeholder="Enter task number" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Solution</label>
+                    <textarea placeholder="Describe your solution..." rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                </div>
+                
+                <label class="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl cursor-pointer hover:bg-indigo-100 transition">
+                    <input type="checkbox" class="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                    <div>
+                        <p class="font-medium text-indigo-900">Use EigenCloud verification</p>
+                        <p class="text-sm text-indigo-600">+20% reputation bonus</p>
+                    </div>
+                </label>
+            </div>
+            
+            <button class="w-full mt-6 btn-primary py-3.5 rounded-xl text-white font-semibold">
                 Submit Task
             </button>
         </div>
     </div>
 
     <!-- Stake Modal -->
-    <div id="stakeModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Stake USDC</h3>
-                <button onclick="closeStakeModal()" class="text-gray-400 hover:text-gray-600">
+    <div id="stakeModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-gray-900">Stake USDC</h3>
+                <button onclick="closeStakeModal()" class="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-lg transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <p class="text-gray-500 mb-4">Stake USDC to increase your reputation weight</p>
-            <div class="flex items-center gap-2 mb-4">
-                <input type="number" placeholder="Amount (USDC)" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                <button class="px-4 py-3 text-blue-600 font-medium">Max</button>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Amount (USDC)</label>
+                    <div class="relative">
+                        <input type="number" placeholder="0.00" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition pr-16">
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-indigo-600 font-medium hover:text-indigo-700">Max</button>
+                    </div>
+                </div>
+                
+                <div class="p-4 bg-green-50 rounded-xl border border-green-100">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="font-medium text-green-900">Boost your reputation</p>
+                            <p class="text-sm text-green-700 mt-1">Staking $10 USDC increases your reputation weight by 10%</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="bg-blue-50 rounded-lg p-3 mb-4">
-                <p class="text-sm text-blue-800">💡 Staking $10 USDC gives you 1.1x reputation multiplier</p>
-            </div>
-            <button class="w-full py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition">
+            
+            <button class="w-full mt-6 btn-primary py-3.5 rounded-xl text-white font-semibold">
                 Stake USDC
             </button>
         </div>
@@ -213,6 +317,8 @@
     <script>
         const CONTRACT = '0x4900fa125313Fd92f7E9b9E323fBAd5fBa289FDd';
         const ABI = ["function getAgent(address) view returns (string name, string bio, string[] skills, uint256 reputationScore, uint256 tasksCompleted, uint256 stakeAmount, bool isRegistered)"];
+        
+        let provider, contract, userAddress;
         
         async function init() {
             if (!window.ethereum) return;
@@ -224,32 +330,57 @@
         }
 
         async function loadDashboard(address) {
+            userAddress = address;
             document.getElementById('notConnected').classList.add('hidden');
             document.getElementById('connected').classList.remove('hidden');
             document.getElementById('walletDisplay').textContent = address.slice(0, 6) + '...' + address.slice(-4);
             document.getElementById('walletDisplay').classList.remove('hidden');
             
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const contract = new ethers.Contract(CONTRACT, ABI, provider);
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            contract = new ethers.Contract(CONTRACT, ABI, provider);
             
             try {
                 const agent = await contract.getAgent(address);
                 
-                document.getElementById('repScore').textContent = agent.reputationScore.toString();
+                const score = agent.reputationScore.toNumber();
+                document.getElementById('repScore').textContent = score;
                 document.getElementById('tasksCount').textContent = agent.tasksCompleted.toString();
                 document.getElementById('stakedAmount').textContent = '$' + (agent.stakeAmount / 1e6).toFixed(2);
-                
-                // Tier badge
-                const score = agent.reputationScore.toNumber();
-                const badge = document.getElementById('tierBadge');
-                if (score >= 800) { badge.textContent = 'Platinum'; badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 mt-2'; }
-                else if (score >= 600) { badge.textContent = 'Gold'; badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700 mt-2'; }
-                else if (score >= 400) { badge.textContent = 'Silver'; badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 mt-2'; }
-                else if (score >= 200) { badge.textContent = 'Bronze'; badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700 mt-2'; }
-                else { badge.textContent = 'Novice'; badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 mt-2'; }
-                
-                // Multiplier (simplified)
+                document.getElementById('earnings').textContent = '$' + (agent.tasksCompleted * 50);
                 document.getElementById('multiplier').textContent = '1.0x';
+                
+                // Tier calculation
+                let tier = 'Novice';
+                let progress = 0;
+                let nextTier = 'Bronze';
+                let nextThreshold = 200;
+                
+                if (score >= 800) {
+                    tier = 'Platinum';
+                    progress = 100;
+                    nextTier = 'Max';
+                } else if (score >= 600) {
+                    tier = 'Gold';
+                    progress = ((score - 600) / 200) * 100;
+                    nextTier = 'Platinum';
+                    nextThreshold = 800;
+                } else if (score >= 400) {
+                    tier = 'Silver';
+                    progress = ((score - 400) / 200) * 100;
+                    nextTier = 'Gold';
+                    nextThreshold = 600;
+                } else if (score >= 200) {
+                    tier = 'Bronze';
+                    progress = ((score - 200) / 200) * 100;
+                    nextTier = 'Silver';
+                    nextThreshold = 400;
+                } else {
+                    progress = (score / 200) * 100;
+                }
+                
+                document.getElementById('tierName').textContent = tier;
+                document.getElementById('tierProgress').style.width = progress + '%';
+                document.getElementById('nextTierText').textContent = score >= 800 ? 'Maximum tier reached!' : `${nextThreshold - score} points to ${nextTier}`;
                 
             } catch (e) {
                 console.error(e);
