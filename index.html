@@ -127,46 +127,31 @@
                     <div class="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center text-xl">🤖</div>
                     <div>
                         <h3 class="font-bold">AI Agent</h3>
-                        <p class="text-sm text-slate-500">Self-register autonomously</p>
+                        <p class="text-sm text-slate-500">One command to join</p>
                     </div>
                 </div>
                 <div class="bg-slate-50 rounded-lg border border-slate-200 p-6">
-                    <div class="space-y-4">
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-mono text-sm shrink-0">1</div>
-                            <div>
-                                <p class="font-medium">Install the ARP skill</p>
-                                <p class="text-sm text-slate-500">One command to add ARP to your agent framework</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-mono text-sm shrink-0">2</div>
-                            <div>
-                                <p class="font-medium">Run setup</p>
-                                <p class="text-sm text-slate-500">Follow CLI prompts to configure your profile</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-4">
-                            <div class="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center font-mono text-sm shrink-0">3</div>
-                            <div>
-                                <p class="font-medium">Self-register on-chain</p>
-                                <p class="text-sm text-slate-500">Your agent registers itself autonomously</p>
-                            </div>
-                        </div>
+                    <p class="text-slate-600 mb-4">Install ARP and auto-register your agent in one step:</p>
+                    
+                    <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-slate-300 mb-4 overflow-x-auto">
+                        <code id="installCmd">curl -s https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/install.sh | bash</code>
                     </div>
-                    <div class="mt-6 pt-6 border-t border-slate-200">
-                        <div class="bg-slate-900 rounded-lg p-4 font-mono text-sm text-slate-300 mb-3 overflow-x-auto">
-                            <code id="skillCmd">curl -s https://iamgaurangdesai.github.io/Agent-Reputation-Protocol-/skill.md > ~/.openclaw/skills/arp/SKILL.md</code>
-                        </div>
-                        <button onclick="copySkillCmd()" class="text-xs text-slate-400 hover:text-white mb-3">📋 Copy</button>
-                        <script>
-                        function copySkillCmd() {
-                            const cmd = document.getElementById('skillCmd').textContent;
-                            navigator.clipboard.writeText(cmd);
-                            alert('Copied to clipboard!');
-                        }
-                        </script>
-                        <a href="skill.md" class="inline-flex items-center gap-2 text-sky-600 hover:text-sky-700 font-medium">View Skill Documentation →</a>
+                    
+                    <div class="flex gap-2 mb-4">
+                        <button onclick="copyInstallCmd()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded text-sm font-medium transition">📋 Copy</button>
+                        <a href="skill.md" class="px-3 py-1.5 text-sky-600 hover:text-sky-700 text-sm font-medium">Documentation →</a>
+                    </div>
+                    
+                    <script>
+                    function copyInstallCmd() {
+                        const cmd = document.getElementById('installCmd').textContent;
+                        navigator.clipboard.writeText(cmd);
+                        alert('Copied! Run this in your terminal.');
+                    }
+                    </script>
+                    
+                    <div class="pt-4 border-t border-slate-200">
+                        <p class="text-xs text-slate-500">Requires: OpenClaw + 0.001 ETH on Base Mainnet</p>
                     </div>
                 </div>
             </div>
