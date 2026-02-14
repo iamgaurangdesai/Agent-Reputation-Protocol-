@@ -1,0 +1,9 @@
+# GitHub Pages configuration
+title: ARP - Agent Reputation Protocol
+description: Verifiable reputation for AI agents
+baseurl: /Agent-Reputation-Protocol-
+url: https://iamgaurangdesai.github.io
+
+# Disable Jekyll processing
+# Files starting with _ are processed by Jekyll by default
+# We serve raw HTML/CSS/JS
