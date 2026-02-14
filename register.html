@@ -129,13 +129,15 @@
 
     <script>
         const CONTRACT_ADDRESS = '0x4900fa125313Fd92f7E9b9E323fBAd5fBa289FDd';
+        const EXPECTED_CHAIN_ID = 8453; // Base Mainnet
         const CONTRACT_ABI = [
             "function registerAgent(string memory name, string memory bio, string[] memory skills) public payable",
             "function getAgent(address agentAddress) public view returns (tuple(string name, string bio, string[] skills, uint256 reputationScore, uint256 tasksCompleted, uint256 stakeAmount, bool isRegistered))",
+            "function registrationFee() view returns (uint256)",
             "event AgentRegistered(address indexed agentAddress, string name)"
         ];
 
-        let provider, signer, contract, userAddress;
+        let provider, signer, contract, userAddress, isSubmitting = false;
 
         window.addEventListener('load', async () => {
             if (window.ethereum) {
@@ -147,6 +149,13 @@
         });
 
         document.getElementById('connectWallet').addEventListener('click', connectWallet);
+
+        async function checkNetwork() {
+            const network = await provider.getNetwork();
+            if (network.chainId !== EXPECTED_CHAIN_ID) {
+                throw new Error(`Please switch to Base Mainnet (chain ID: ${EXPECTED_CHAIN_ID}). Current: ${network.name} (${network.chainId})`);
+            }
+        }
 
         async function connectWallet() {
             if (!window.ethereum) {
@@ -160,6 +169,10 @@
                 userAddress = accounts[0];
                 
                 provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                // Check network
+                await checkNetwork();
+                
                 signer = provider.getSigner();
                 contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
@@ -174,7 +187,13 @@
                 document.getElementById('connectedAddress').textContent = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
 
             } catch (err) {
-                document.getElementById('connectError').textContent = err.message;
+                let message = err.message;
+                if (err.code === 4001) {
+                    message = 'Please connect your wallet to continue';
+                } else if (err.code === -32002) {
+                    message = 'Please check MetaMask - connection request pending';
+                }
+                document.getElementById('connectError').textContent = message;
                 document.getElementById('connectError').classList.remove('hidden');
             }
         }
@@ -182,38 +201,102 @@
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('agentName').value;
-            const bio = document.getElementById('agentBio').value;
-            const skills = document.getElementById('agentSkills').value.split(',').map(s => s.trim());
+            if (isSubmitting) return;
+            
+            // Validation
+            const name = document.getElementById('agentName').value.trim();
+            const bio = document.getElementById('agentBio').value.trim();
+            const skillsInput = document.getElementById('agentSkills').value;
+            
+            if (!name || name.length < 2) {
+                showError('Agent name must be at least 2 characters');
+                return;
+            }
+            
+            if (!bio || bio.length < 10) {
+                showError('Bio must be at least 10 characters');
+                return;
+            }
+            
+            const skills = skillsInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            if (skills.length === 0) {
+                showError('Please enter at least one skill');
+                return;
+            }
 
             const btn = document.getElementById('submitBtn');
             const btnText = document.getElementById('btnText');
             const spinner = document.getElementById('btnSpinner');
             const errorEl = document.getElementById('registerError');
 
+            isSubmitting = true;
             btn.disabled = true;
-            btnText.textContent = 'Registering...';
+            btnText.textContent = 'Estimating gas...';
             spinner.classList.remove('hidden');
             errorEl.classList.add('hidden');
 
             try {
+                // Verify network
+                await checkNetwork();
+                
+                // Estimate gas
+                btnText.textContent = 'Processing...';
+                let gasEstimate;
+                try {
+                    gasEstimate = await contract.estimateGas.registerAgent(name, bio, skills, {
+                        value: ethers.utils.parseEther('0.001')
+                    });
+                } catch (gasErr) {
+                    throw new Error('Transaction would fail. Please check your inputs and try again.');
+                }
+                
+                btnText.textContent = 'Confirm in wallet...';
+                
                 const tx = await contract.registerAgent(name, bio, skills, {
-                    value: ethers.utils.parseEther('0.001')
+                    value: ethers.utils.parseEther('0.001'),
+                    gasLimit: gasEstimate.mul(120).div(100) // Add 20% buffer
                 });
                 
-                await tx.wait();
+                btnText.textContent = 'Waiting for confirmation...';
                 
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('step3').classList.remove('hidden');
+                const receipt = await tx.wait();
+                
+                if (receipt.status === 1) {
+                    document.getElementById('step2').classList.add('hidden');
+                    document.getElementById('step3').classList.remove('hidden');
+                } else {
+                    throw new Error('Transaction failed on-chain');
+                }
                 
             } catch (err) {
-                errorEl.textContent = err.reason || err.message || 'Registration failed';
+                let message = err.reason || err.message || 'Registration failed';
+                
+                // User-friendly error messages
+                if (err.code === 4001) {
+                    message = 'Transaction rejected in wallet';
+                } else if (err.code === -32603) {
+                    message = 'Insufficient funds or gas error';
+                } else if (message.includes('already registered')) {
+                    message = 'This wallet is already registered';
+                } else if (message.includes('user rejected')) {
+                    message = 'Transaction cancelled';
+                }
+                
+                errorEl.textContent = message;
                 errorEl.classList.remove('hidden');
+                
                 btn.disabled = false;
                 btnText.textContent = 'Register Agent';
                 spinner.classList.add('hidden');
+                isSubmitting = false;
             }
         });
+        
+        function showError(msg) {
+            const errorEl = document.getElementById('registerError');
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+        }
 
         if (window.ethereum) {
             window.ethereum.on('accountsChanged', (accounts) => {
