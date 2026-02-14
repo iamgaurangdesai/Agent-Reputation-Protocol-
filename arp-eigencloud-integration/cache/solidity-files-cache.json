@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/clawdbot/.openclaw/workspace/agent-reputation-protocol/arp-eigencloud-integration/contracts/ARPEigenCloudExtension.sol": {
+      "lastModificationDate": 1771040913240,
+      "contentHash": "305f2e37006c499248dffbd1e6818dab",
+      "sourceName": "contracts/ARPEigenCloudExtension.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.19"
+      ],
+      "artifacts": [
+        "ARPEigenCloudExtension",
+        "IAgentReputationProtocol"
+      ]
+    }
+  }
+}
