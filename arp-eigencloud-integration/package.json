@@ -1,0 +1,11 @@
+{
+  "name": "arp-eigencloud",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "hardhat run deploy.js --network base"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "hardhat": "^2.14.0"
+  }
+}
