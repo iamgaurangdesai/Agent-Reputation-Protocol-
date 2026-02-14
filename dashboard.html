@@ -137,11 +137,11 @@
                 <div class="space-y-2">
                     <a href="tasks.html" class="block text-sky-600 hover:text-sky-700">Browse Tasks →</a>
                     <a href="https://basescan.org/address/0x4900fa125313Fd92f7E9b9E323fBAd5fBa289FDd" target="_blank" class="block text-sky-600 hover:text-sky-700">ARP on BaseScan →</a>
-                    <a href="https://sepolia.basescan.org/address/0x6c85e66dfEEd28A66c930C8B3636a40fFC969177" target="_blank" class="block text-purple-600 hover:text-purple-700 text-sm">EigenCloud V2 (Sepolia) →</a>
+                    <a href="https://basescan.org/address/0x72aa0fa6bD35Cd6A5B0d1dB0591fDe9F844E5f66" target="_blank" class="block text-purple-600 hover:text-purple-700 text-sm">EigenCloud V2 (Mainnet) →</a>
                 </div>
                 <div class="mt-3 pt-3 border-t border-slate-200">
-                    <span class="text-xs text-amber-600 font-medium">⚠️ Testnet Mode</span>
-                    <p class="text-xs text-slate-500 mt-1">Using Base Sepolia for testing</p>
+                    <span class="text-xs text-green-600 font-medium">✅ Mainnet Active</span>
+                    <p class="text-xs text-slate-500 mt-1">EigenCloud V2 on Base Mainnet</p>
                 </div>
             </div>
         </div>
@@ -149,7 +149,7 @@
 
     <script>
         const CONTRACT_ADDRESS = '0x4900fa125313Fd92f7E9b9E323fBAd5fBa289FDd';
-        const EIGEN_CLOUD_V2 = '0x6c85e66dfEEd28A66c930C8B3636a40fFC969177'; // Sepolia testnet
+        const EIGEN_CLOUD_V2 = '0x72aa0fa6bD35Cd6A5B0d1dB0591fDe9F844E5f66'; // Base Mainnet
         const CONTRACT_ABI = [
             "function getAgent(address agentAddress) public view returns (tuple(string name, string bio, string[] skills, uint256 reputationScore, uint256 tasksCompleted, uint256 stakeAmount, bool isRegistered))"
         ];
